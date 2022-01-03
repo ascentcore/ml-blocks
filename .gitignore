@@ -71,6 +71,8 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+node_modules
+
 # PyBuilder
 target/
 
@@ -127,3 +129,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.parcel-cache

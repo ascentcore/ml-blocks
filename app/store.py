@@ -18,6 +18,18 @@ class Storage:
     def store_json(self, data):
         pass
 
+def cleanup():
+    try:
+        conn = sql.connect('database/session.db')
+        cur = conn.cursor()
+        cur.execute("DELETE from dependency")
+        conn.commit()
+        conn.close()
+    except:
+        print('ERROR')
+        pass
+
+
 
 class SQLStorage(Storage):
 

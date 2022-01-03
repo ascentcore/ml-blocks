@@ -1,29 +1,35 @@
 import logging
 
-from typing import Generator, Optional
-from fastapi import FastAPI, File, UploadFile, Form, Request
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
-from .loaders.loader_factory import get_loader
-
-from .runtime import runtime
+from starlette.middleware.cors import CORSMiddleware
 
 from .api.v1.api import api_router
 from .core.config import settings
 
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+from .store import cleanup
 
+logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
-loader = get_loader(runtime.loader, {})
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...), append: bool = Form(None)):    
-    logger.info('File uploaded. Processing...')
-    loader.load_file(file.file)
-    runtime.process_dataset(loader.data)
-    loader.store(append)
 
+app.mount("/ui", StaticFiles(directory="/app/ml-blocks-ui/dist", html=True), name="static")
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.on_event("startup")
+def start_event():
+    print("#####")
+    cleanup()

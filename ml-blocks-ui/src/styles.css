@@ -1,0 +1,15 @@
+#graph-container {
+  border: 1px solid #808080;
+}
+
+.flow {
+  stroke-dasharray: 10;
+  animation: dash 5s linear infinite;
+}
+
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -300;
+  }
+}

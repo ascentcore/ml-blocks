@@ -1,0 +1,18 @@
+{
+  "name": "ml-blocks-ui",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel  --public-url .",
+    "dev-local": "parcel",
+    "build": "rm -rf dist; parcel build  --public-url ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "axios": "^0.24.0",
+    "d3": "^7.2.1",
+    "parcel": "^2.0.1"
+  }
+}
