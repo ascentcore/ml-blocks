@@ -5,7 +5,6 @@ import socket
 import asyncio
 from time import sleep
 
-from .default.process import process_dataset
 from .custom import Custom
 
 from fastapi import Depends
@@ -19,11 +18,10 @@ def noop():
 defaults = {
     'name': "Untitled",
     'loader': 'pandas',
-    'process_dataset': process_dataset,
+    'process_dataset': noop,
     'train': noop,
     'predict': noop
 }
-
 
 class Runtime(Custom):
 
@@ -36,7 +34,7 @@ class Runtime(Custom):
     graph = None
 
     async def _register(self):
-        await asyncio.sleep(3)
+        # await asyncio.sleep(3)
         if self.registered == False:
             try:
                 requests.put(f'http://{self.dependency}/api/v1/pipe/register')
@@ -54,7 +52,7 @@ class Runtime(Custom):
 
         if dependency != None:
             self.dependency = dependency
-            asyncio.run(self._register())
+            self.try_register()
 
         try:
             infile = open('/app/model/model.pkl', 'rb')
@@ -63,8 +61,16 @@ class Runtime(Custom):
         except:
             pass
 
-    def retry(self):
-        asyncio.run(self._register())
+    def try_register(self):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError: 
+            loop = None
+
+        if loop and loop.is_running():
+            loop.create_task(self._register())
+        else:
+            asyncio.run(self._register())
 
     def register(self, host, db):
         dependency = models.Dependency(dependency=host)
@@ -104,6 +110,7 @@ class Runtime(Custom):
 
     def store(self, model):
         if model != None:
+            self.model = model
             outfile = open('/app/model/model.pkl', 'wb')
             pickle.dump(model, outfile)
             outfile.close()
