@@ -4,7 +4,7 @@ import json
 
 from fastapi import APIRouter, Depends, Request
 from app.store import Storage
-from app.api import deps
+from app import deps
 from app.runtime import Runtime
 
 import pandas
