@@ -1,4 +1,6 @@
 
+from typing import List
+
 import logging
 import requests
 import pandas
@@ -10,7 +12,6 @@ from app import deps
 from app.runtime import runtime
 from app.loaders.loader_factory import get_loader
 
-loader = get_loader(runtime.loader, {})
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,15 +35,19 @@ def refresh(
         db.store_pandas(df)
 
 
-@router.post("/uploadfile")
+@router.post("/uploadfiles")
 def create_upload_file(
         runtime=Depends(deps.get_runtime), 
         pipeline = Depends(deps.get_piepline), 
-        file: UploadFile = File(...),
+        files: List[UploadFile] = File(...),
         db = Depends(deps.get_orm_db),
+        loader: str = Form('csv'),
         append: bool = Form(None)):
+    
     logger.info('File uploaded. Processing...')
-    loader.load_file(file.file)
-    runtime.process_dataset(loader.data)
-    loader.store(append)
+    loader = get_loader(loader)
+    print({"filenames": [file.filename for file in files]})
+    loader.load_files(files)
+    output = runtime.process_dataset(loader.data)
+    loader.store(output, append)
     pipeline.trigger_downstream(db)

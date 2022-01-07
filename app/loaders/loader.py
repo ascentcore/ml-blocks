@@ -3,13 +3,13 @@ class Loader:
     def __init__(self, config):        
         self.config = config
 
-    def load_file(self, file):
+    def load_files(self, files):
         pass
 
     def load_object(self, obj):
         self.data = obj
 
-    def store(self, append = False):
+    def store(self, data, append = False):
         pass
     
     

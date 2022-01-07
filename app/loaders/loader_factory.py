@@ -1,15 +1,12 @@
-from .pandas_loader import PandasLoader
-from .raw_loader import RawLoader
+from .csv_loader import CSVLoader
+# from .zip_loader import ZIPLoader
 from .loader import Loader
 
 switches = {
-    "pandas": PandasLoader,
-    "raw": RawLoader
+    "csv": CSVLoader,
+    # "zip": ZIPLoader
 }
 
-def get_loader(loader_config, config) -> Loader:
-    if isinstance(loader_config, str):
-        return switches[loader_config](config)
-    
-    return loader_config
+def get_loader(loader_type, config = None) -> Loader:
+    return switches[loader_type](config)
         

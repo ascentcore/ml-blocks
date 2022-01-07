@@ -1,17 +1,12 @@
-import requests
 import pickle
 
-from time import sleep
-
 from .custom import Custom
-
 
 def noop():
     pass
 
 defaults = {
     'name': "Untitled",
-    'loader': 'pandas',
     'process_dataset': noop,
     'train': noop,
     'predict': noop
