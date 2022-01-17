@@ -2,14 +2,15 @@ import pickle
 
 from .custom import Custom
 
-def noop():
+def noop(param1 = None):
     pass
 
 defaults = {
     'name': "Untitled",
     'process_dataset': noop,
     'train': noop,
-    'predict': noop
+    'predict': noop,
+    'generate_statics': noop
 }
 
 class Runtime(Custom):
@@ -27,14 +28,6 @@ class Runtime(Custom):
             infile.close()
         except:
             pass
-
-
-    def store(self, model):
-        if model != None:
-            self.model = model
-            outfile = open('/app/model/model.pkl', 'wb')
-            pickle.dump(model, outfile)
-            outfile.close()
 
 
 runtime = Runtime()

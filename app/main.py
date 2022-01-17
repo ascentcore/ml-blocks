@@ -24,10 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.mount("/ui", StaticFiles(directory="/app/ml-blocks-ui/dist", html=True), name="static")
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.mount("/generated/download", StaticFiles(directory="/app/generated", html=True), name="generated")
 
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 def start_event():

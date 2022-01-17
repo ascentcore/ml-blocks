@@ -86,9 +86,12 @@ class Pipeline:
         return root
 
     def trigger_downstream(self, db):
-        children =  db.query(models.Dependency).all()
-        for child in children:
-            requests.get(f'http://{child.dependency}/api/v1/data/refresh')
+        try:
+            children =  db.query(models.Dependency).all()
+            for child in children:
+                requests.get(f'http://{child.dependency}/api/v1/data/refresh')
+        except: 
+            pass
 
 
 pipeline = Pipeline()
