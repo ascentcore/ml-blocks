@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+requirements_local.txt
 # Distribution / packaging
 .Python
 build/
@@ -71,6 +71,8 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+node_modules
+
 # PyBuilder
 target/
 
@@ -127,3 +129,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.parcel-cache
