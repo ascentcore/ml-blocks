@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
 
+from .api.v1 import api_router
+from .config import settings
 
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
@@ -20,9 +22,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/test")
-async def root():
-    return {"message": "Hello World"}
+# @app.get("/api/test")
+# async def root():
+#     return {"message": "Hello World"}
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 app.mount("/", StaticFiles(directory="/app/ui/", html=True), name="static")
 # app.mount("/generated/download", StaticFiles(directory="/app/generated", html=True), name="generated")
