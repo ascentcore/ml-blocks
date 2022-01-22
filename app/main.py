@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
 
+from .flow import statics_folder
+
 from .api.v1 import api_router
 from .config import settings
 
@@ -29,5 +31,5 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 app.mount("/", StaticFiles(directory="/app/ui/", html=True), name="static")
-# app.mount("/generated/download", StaticFiles(directory="/app/generated", html=True), name="generated")
+app.mount("/api/v1/download", StaticFiles(directory=statics_folder), name="generated")
 

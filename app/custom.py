@@ -1,4 +1,2 @@
 class Custom:
     name = "MLBlock"
-
-    

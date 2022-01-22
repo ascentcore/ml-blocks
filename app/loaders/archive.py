@@ -85,14 +85,18 @@ class ArchiveLoader(Loader):
 
         self.recreate_dataset()
 
-    def load_data(self, page = 0, count = 10):
+    def load_data(self, page=0, count=10):
         offset = page * count
         file_list = self.dataset[offset:offset+count]
         response = []
         for file_name in file_list:
             f = open(file_name, "rb")
-            response.append( base64.b64encode(f.read()))
+            response.append(base64.b64encode(f.read()))
         return response
+
+    def looad_from_store(self):
+        # return path names so far
+        return self.dataset
 
     def default_process(self):
         pass

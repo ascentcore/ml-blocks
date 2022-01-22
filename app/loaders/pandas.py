@@ -39,13 +39,19 @@ class PandasLoader(Loader):
 
     def store_to_db(self):
         conn = self.get_connection()
-        self.data.to_sql('raw_data', conn, if_exists='replace')
+        replace = ('append' if self.append == True else 'replace')
+        self.data.to_sql('raw_data', conn, if_exists = replace)
         conn.close()
+
+    def looad_from_store(self):
+        conn = self.get_connection()
+        df = pd.read_sql_query('SELECT * from "raw_data"', conn)
+        conn.close()
+        return df
 
     def load_data(self, page = 0, count = 10):
         conn = self.get_connection()
         cur = conn.cursor()
-        # page_str = f',{page}' if page != 0 else ''
         cur.execute(f'SELECT * from "raw_data" LIMIT {page * count},{count}')
         cur_result = cur.fetchall()
         conn.close()

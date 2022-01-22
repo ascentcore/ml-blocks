@@ -11,3 +11,6 @@ class Loader:
 
     def load_page(self, page, count):
         pass
+
+    def load_from_store(self):
+        pass

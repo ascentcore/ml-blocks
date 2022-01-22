@@ -6,7 +6,6 @@ def noop(*argv):
     pass
 
 defaults = {
-    # 'process_dataset': noop,
     'train': noop,
     'predict': noop,
     'generate_statics': noop
