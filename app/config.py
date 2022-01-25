@@ -1,6 +1,5 @@
 import logging
 import os
-
 from pydantic import BaseSettings
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +13,9 @@ class Settings(BaseSettings):
     VERSION: str = f"1.0.0 {RUN_ENV}".strip()
     API_V1_STR: str = "/api/v1"
     MOUNT_FOLDER: str = "/app/data"
-    
+    MESSAGE_BROKER: str = os.getenv("MESSAGE_BROKER", None)
+    DEPENDENCY: str = os.getenv("DEPENDENCY", "MLBlock")
+   
     class Config:
         case_sensitive = True
 

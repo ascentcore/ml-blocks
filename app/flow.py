@@ -44,8 +44,7 @@ class Flow():
         self.runtime.generate_statics(self.loader.data, statics_folder)
 
     def store_data(self):
-        logger.info('Storing dataset')
-
+        logger.info('Storing')
         self.loader.store()
         logger.info('Dataset processed')
 

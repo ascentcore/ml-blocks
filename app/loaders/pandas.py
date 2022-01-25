@@ -40,7 +40,7 @@ class PandasLoader(Loader):
     def store_to_db(self):
         conn = self.get_connection()
         replace = ('append' if self.append == True else 'replace')
-        self.data.to_sql('raw_data', conn, if_exists = replace)
+        self.data.to_sql('raw_data', conn, index = False, if_exists = replace)
         conn.close()
 
     def looad_from_store(self):

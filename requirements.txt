@@ -8,3 +8,5 @@ requests>=2.26.0
 httpx>=0.21.1
 aiofiles>=0.8.0
 sqlalchemy>=1.4.29
+pika>=1.2.0
+aio-pika>=6.8.1
