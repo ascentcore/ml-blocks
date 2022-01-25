@@ -40,6 +40,7 @@ task = None
 @app.on_event('startup')
 async def startup(flow: Flow = Depends(get_flow)):
     global task
+    logger.info('ML-Blocks startup complete...')
     loop = asyncio.get_event_loop()
     task = loop.create_task(connect_to_queue(loop, flow))
 
