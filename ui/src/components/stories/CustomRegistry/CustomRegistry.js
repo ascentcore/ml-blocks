@@ -28,7 +28,13 @@ function MUITextField({ property, value, onChange }) {
     const classes = useStyles();
 
     const handleChange = (event) => {
-        onChange(event.target.value)
+        if (property.title == 'Phone number') {
+            const re = /[0-9]+/g;
+            if (event.target.value === '' || re.test(event.target.value)) {
+                onChange(event.target.value)
+            }
+        }
+        else onChange(event.target.value)
     }
     return (
         <TextField
@@ -82,28 +88,6 @@ function MUICheckbox({ property }) {
         <>
             {property.title}
             <Checkbox />
-        </>
-    )
-}
-
-function MUINumberField({ property }) {
-    const [value, setValue] = useState();
-    const handleChange = (e) => {
-        const re = property.pattern;
-        if (e.target.value === '' || re.test(e.target.value)) {
-            setValue(e.target.value)
-        }
-    }
-    return (
-        <>
-            {property.title}
-            <TextField
-                value={value || 0}
-                onChange={handleChange}
-                helperText={property.error ? property.error[0].keyword : ' '}
-                required={property.isRequired}
-            />
-
         </>
     )
 }
@@ -210,8 +194,7 @@ export default function CustomRegistryExample() {
         integer: { component: MUISlider, wrapper: MUIWrapper },
         enum: { component: MUIType, wrapper: MUIWrapper },
         addButton: { component: MUIAddButton, wrapper: MUIWrapper },
-        boolean: { component: MUICheckbox, wrapper: MUIWrapper },
-        //array: { component: MUINumberField, wrapper: MUIWrapper }
+        boolean: { component: MUICheckbox, wrapper: MUIWrapper }
     }
 
     const exceptions = {

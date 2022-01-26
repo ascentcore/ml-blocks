@@ -4,6 +4,7 @@ export const useStyles = makeStyles((theme) => ({
     input: {
         width: '200px',
         height: '100px',
+        marginTop: '20px'
     },
     slider: {
         width: '500px'
