@@ -43,9 +43,13 @@ class Flow():
             self.loader.default_process()
 
     def generate_statics(self):
+        logger.info('Generating statics')
         global statics_folder
-        data = self.loader.load_from_store()
-        self.runtime.generate_statics(data, statics_folder)
+        if self.runtime.has_static_generation == True:        
+            data = self.loader.load_from_store()
+            self.runtime.generate_statics(data, statics_folder)
+        else:
+            logger.info('Block implementation has no statics generation code')
 
     def list_statics(self):
         return os.listdir(statics_folder)
