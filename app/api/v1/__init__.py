@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import data, settings, status
+from . import data, settings, status, statics
 
 api_router = APIRouter()
 
@@ -7,3 +7,4 @@ api_router = APIRouter()
 api_router.include_router(data.router, prefix="/data", tags=["data"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 api_router.include_router(status.router, prefix="/status", tags=["status"])
+api_router.include_router(statics.router, prefix="/statics", tags=["statics"])

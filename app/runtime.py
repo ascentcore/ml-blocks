@@ -15,8 +15,9 @@ class Runtime(Custom):
 
     model = None
 
+    has_static_generation = False
+
     def __init__(self):
-        print('#### runtime initialized')
         for prop in defaults.keys():
             print('###', prop)
             if hasattr(self, prop) == False:
@@ -28,3 +29,5 @@ class Runtime(Custom):
             infile.close()
         except:
             pass
+
+        self.has_static_generation = self.generate_statics != noop

@@ -34,7 +34,6 @@ app.mount("/", StaticFiles(directory="/app/ui/", html=True), name="static")
 app.mount("/api/v1/download",
           StaticFiles(directory=statics_folder), name="generated")
 
-
 task = None
 
 @app.on_event('startup')

@@ -27,6 +27,7 @@ class Flow():
         self.add_data(content, append)
         self.process_data()
         self.store_data()
+        self.generate_statics()
 
     def add_data(self, content, append):
         logger.info('Started loading data')
@@ -41,7 +42,13 @@ class Flow():
         else:
             self.loader.default_process()
 
-        self.runtime.generate_statics(self.loader.data, statics_folder)
+    def generate_statics(self):
+        global statics_folder
+        data = self.loader.load_from_store()
+        self.runtime.generate_statics(data, statics_folder)
+
+    def list_statics(self):
+        return os.listdir(statics_folder)
 
     def store_data(self):
         logger.info('Storing')

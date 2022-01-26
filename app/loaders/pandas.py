@@ -43,7 +43,7 @@ class PandasLoader(Loader):
         self.data.to_sql('raw_data', conn, index = False, if_exists = replace)
         conn.close()
 
-    def looad_from_store(self):
+    def load_from_store(self):
         conn = self.get_connection()
         df = pd.read_sql_query('SELECT * from "raw_data"', conn)
         conn.close()
