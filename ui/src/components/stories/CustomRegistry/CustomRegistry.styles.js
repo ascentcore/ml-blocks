@@ -3,7 +3,7 @@ import { makeStyles } from "@mui/styles";
 export const useStyles = makeStyles((theme) => ({
     input: {
         width: '200px',
-        height: '100px',
+        height: '60px',
         marginTop: '20px'
     },
     slider: {
