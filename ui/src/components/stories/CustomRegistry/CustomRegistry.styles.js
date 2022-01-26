@@ -7,11 +7,11 @@ export const useStyles = makeStyles((theme) => ({
         marginTop: '20px'
     },
     slider: {
-        width: '500px'
+        width: '500px',
     },
     map: {
         height: '200px',
-        width: '700px'
+        width: '500px'
     },
     addButton: {
         height: '15px',
