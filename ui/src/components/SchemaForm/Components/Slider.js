@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Slider } from '@mui/material';
+import { Box, Grid, Slider } from '@mui/material';
 import { useStyles } from './Style.styles';
 
 export function MUISlider({ property, value, onChange }) {
@@ -9,15 +9,17 @@ export function MUISlider({ property, value, onChange }) {
     }
 
     return (
-        <Grid item className={classes.grid}>
+        <Grid item className={classes.grid} >
             <div className={classes.title}>{property.title}</div>
-            <Slider
-                value={value !== undefined ? value : property.minimum ? property.minimum : 0}
-                min={property.minimum ? property.minimum : 0}
-                onChange={handleChange}
-                valueLabelDisplay='auto'
-                className={classes.slider}
-            />
+            <Box width={480}>
+                <Slider
+                    value={value !== undefined ? value : property.minimum ? property.minimum : 0}
+                    min={property.minimum ? property.minimum : 0}
+                    onChange={handleChange}
+                    valueLabelDisplay='auto'
+                    className={classes.slider}
+                />
+            </Box>
         </Grid>
     )
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField } from '@mui/material';
+import { Grid, TextField } from '@mui/material';
 import { useStyles } from './Style.styles';
 
 export function MUITextField({ property, value, onChange }) {
@@ -15,14 +15,15 @@ export function MUITextField({ property, value, onChange }) {
         else onChange(event.target.value)
     }
     return (
-        <TextField
-            value={value || ''}
-            onChange={handleChange}
-            error={!!property.error}
-            label={property.title}
-            helperText={property.error ? property.error[0].keyword : ' '}
-            required={property.isRequired}
-            className={classes.input}
-        />
+        <Grid container className={classes.grid}>
+            <TextField
+                value={value || ''}
+                onChange={handleChange}
+                error={!!property.error}
+                label={property.title}
+                required={property.isRequired}
+                className={classes.input}
+            />
+        </Grid>
     )
 }

@@ -4,11 +4,9 @@ export const useStyles = makeStyles((theme) => ({
     input: {
         width: '200px',
         height: '60px',
-        marginTop: '20px'
     },
     slider: {
-        width: '500px',
-        marginLeft: '20px'
+        marginLeft: '20px',
     },
     map: {
         height: '200px',
@@ -16,20 +14,23 @@ export const useStyles = makeStyles((theme) => ({
     },
     addButton: {
         height: '15px',
-        position: 'fixed',
-        margin: '-15px 0 0 110px'
+        position: 'sticky',
+        marginTop: '10px',
     },
     selector: {
         height: '20px',
         marginLeft: '10px'
     },
     grid: {
-        margin: '20px 0'
+        margin: ' 20px 0'
     },
     title: {
-        marginRight: '10px'
+        marginRight: '10px',
     },
     radioButton: {
         marginLeft: '20px'
-    }
+    },
+    error: {
+        color: 'red'
+    },
 }))
