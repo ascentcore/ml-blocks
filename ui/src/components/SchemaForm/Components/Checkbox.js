@@ -6,7 +6,7 @@ export function MUICheckbox({ property }) {
     const classes = useStyles();
     return (
         <Grid container className={classes.grid}>
-            <div style={{ marginTop: 13 }}>{property.title}</div>
+            <div style={{ marginTop: 12 }}>{property.title}</div>
             <Checkbox />
         </Grid>
     )
