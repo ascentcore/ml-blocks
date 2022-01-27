@@ -10,7 +10,7 @@ export function MUIType({ property, value, onChange }) {
     return (
         <FormControl>
             <div className={classes.title}>{property.title}*</div>
-            <RadioGroup value={value || null} onChange={handleChange} className={classes.radioButton}>
+            <RadioGroup value={value} onChange={handleChange} className={classes.radioButton}>
                 {property.enum.map((item, index) => {
                     return (
                         <FormControlLabel

@@ -19,7 +19,7 @@ export const useStyles = makeStyles((theme) => ({
     },
     selector: {
         height: '20px',
-        marginLeft: '10px'
+        marginLeft: '10px',
     },
     grid: {
         margin: ' 20px 0'

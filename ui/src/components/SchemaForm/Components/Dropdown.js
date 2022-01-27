@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, Select, MenuItem } from '@mui/material';
+import { Grid, Select, MenuItem, TextField } from '@mui/material';
 import { useStyles } from './Style.styles';
 
 export function MUISelectElement({ property, value, onChange }) {
@@ -15,10 +15,26 @@ export function MUISelectElement({ property, value, onChange }) {
                 value={value}
                 onChange={handleChange}
                 className={classes.selector}
+                MenuProps={{
+                    anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "center"
+                    },
+                    transformOrigin: {
+                        vertical: "center",
+                        horizontal: "center"
+                    },
+                    getContentAnchorEl: null
+                }}
             >
-                <MenuItem value={property.enum[0]}>{property.enum[0]}</MenuItem>
-                <MenuItem value={property.enum[1]}>{property.enum[1]}</MenuItem>
+                {property.enum.map((item, index) => {
+                    return (
+                        <MenuItem key={index} value={item}>
+                            {item}
+                        </MenuItem>
+                    )
+                })}
             </Select>
-        </Grid>
+        </Grid >
     )
 }
