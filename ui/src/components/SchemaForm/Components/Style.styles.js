@@ -8,6 +8,7 @@ export const useStyles = makeStyles((theme) => ({
     },
     slider: {
         width: '500px',
+        marginLeft: '20px'
     },
     map: {
         height: '200px',
@@ -24,5 +25,11 @@ export const useStyles = makeStyles((theme) => ({
     },
     grid: {
         margin: '20px 0'
+    },
+    title: {
+        marginRight: '10px'
+    },
+    radioButton: {
+        marginLeft: '20px'
     }
 }))
