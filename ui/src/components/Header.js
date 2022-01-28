@@ -21,8 +21,8 @@ function Header() {
             <AppBar position='static' className={classes.appbar}>
                 <Container maxWidth="lg">
                     <Toolbar>
-                        <Link href="/upload" className={classes.link} underline='none'>Upload</Link>
                         <Link href="/" className={classes.link} underline='none'>Home</Link>
+                        <Link href="/upload" className={classes.link} underline='none'>Upload</Link>
                     </Toolbar>
                 </Container>
             </AppBar>
