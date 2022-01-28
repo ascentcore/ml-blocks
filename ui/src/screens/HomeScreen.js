@@ -3,9 +3,7 @@ import Layout from '../components/Layout';
 
 const HomeScreen = () => {
     return (
-        <Layout>
-            <h2>Lorem ipsum</h2>
-        </Layout>
+        <h2>Lorem ipsum</h2>
     )
 }
 

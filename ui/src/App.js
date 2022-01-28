@@ -1,12 +1,20 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route
+} from 'react-router-dom';
 import './App.css';
-import Routes from './Routes';
+import Layout from './components/Layout';
+import HomeScreen from './screens/HomeScreen';
 
 function App() {
   return (
     <div className="App">
-      <Route component={Routes} />
+      <Layout>
+        <Router>
+          <Route path='/' component={HomeScreen} />
+        </Router>
+      </Layout>
     </div>
   );
 }
