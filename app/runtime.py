@@ -1,6 +1,6 @@
 import pickle
 
-from .custom import Custom
+from app.custom.custom import Custom
 
 def noop(*argv):
     pass
@@ -23,11 +23,15 @@ class Runtime(Custom):
             if hasattr(self, prop) == False:
                 setattr(self, prop, defaults[prop])
 
-        try:
-            infile = open('/app/data/model/model.pkl', 'rb')
-            self.model = pickle.load(infile)
-            infile.close()
-        except:
-            pass
+        if hasattr(self, 'load_model'):
+            self.model = self.load_model()
+        else:
+            try:
+                infile = open('/app/data/model/model.pkl', 'rb')
+                self.model = pickle.load(infile)
+                infile.close()
+            except:
+                pass
+
 
         self.has_static_generation = self.generate_statics != noop
