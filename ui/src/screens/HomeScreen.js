@@ -5,9 +5,7 @@ import Layout from '../components/Layout';
 
 function HomeScreen() {
     return (
-        <Layout>
-            <h2>Lorem ipsum</h2>
-        </Layout>
+        <h2>Lorem ipsum</h2>
     )
 }
 
