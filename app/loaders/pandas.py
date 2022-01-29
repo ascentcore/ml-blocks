@@ -6,21 +6,23 @@ from app.config import settings
 
 from .loader import Loader
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class PandasLoader(Loader):
 
-    def __init__(self):
+    def __init__(self, config):
         logger.info('[Pandas Loder] initialized')
+        self.config = config
 
     def get_connection(self):
         return sql.connect(f'{settings.MOUNT_FOLDER}/data.db')
 
     def load_files(self, files, append):        
         logger.info('Loading files started')
-        self.data = [pd.read_csv(file.file) for file in files]
+        method = self.config.get('loader_method', 'read_csv')
+        config = self.config.get('load_config', {})
+        self.data = [getattr(pd, method)(file.file, **config) for file in files]
         self.append = append
 
     def default_process(self):

@@ -19,10 +19,11 @@ router = APIRouter()
 def create_upload_file(
         background_tasks: BackgroundTasks,
         files: List[UploadFile] = File(...),    
-        append: bool = Form(None),    
+        append: bool = Form(None),
+        extras: str = Form(None),
         flow: Flow = Depends(get_flow)):
-
-    background_tasks.add_task(flow.start_data_ingest, files, append)
+    print("Extras", extras)
+    background_tasks.add_task(flow.start_data_ingest, files, append, extras)
     return {"message": "Started data processing"}
 
 @router.get("/count")

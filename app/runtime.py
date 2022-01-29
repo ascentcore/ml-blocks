@@ -8,7 +8,8 @@ def noop(*argv):
 defaults = {
     'train': noop,
     'predict': noop,
-    'generate_statics': noop
+    'generate_statics': noop,
+    'loader_config': {}
 }
 
 class Runtime(Custom):

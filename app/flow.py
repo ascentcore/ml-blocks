@@ -13,19 +13,22 @@ statics_folder = f'{settings.MOUNT_FOLDER}/statics'
 
 class Flow():
     
-    loader = PandasLoader()
+    loader = None
 
     runtime = Runtime()
 
     def __init__(self):
+
+        self.loader = PandasLoader(self.runtime.loader_config)
+
         try:
             os.mkdir(statics_folder)
         except:
             pass
 
-    def start_data_ingest(self, content, append):
+    def start_data_ingest(self, content, append, extras):
         self.add_data(content, append)
-        self.process_data()
+        self.process_data(extras)
         self.store_data()
         self.generate_statics()
 
@@ -34,11 +37,11 @@ class Flow():
         self.loader.load_files(content, append)
         logger.info('Data loading complete')
 
-    def process_data(self):
+    def process_data(self, extras):
         logger.info('Processing dataset')
 
         if hasattr(self.runtime, 'process_dataset'):
-            self.loader.data = self.runtime.process_dataset(self.loader.data)
+            self.loader.data = self.runtime.process_dataset(self.loader.data, extras)
         else:
             self.loader.default_process()
 
