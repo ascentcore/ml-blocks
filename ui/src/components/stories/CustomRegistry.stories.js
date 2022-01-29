@@ -1,5 +1,5 @@
 import React from "react";
-import CustomRegistryExample from "./CustomRegistry";
+import CustomRegistryExample from "../SchemaForm/CustomRegistry";
 
 const ComponentStory = {
     title: 'CustomRegistryExample',

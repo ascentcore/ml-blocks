@@ -5,7 +5,7 @@ import HomeScreen from './screens/HomeScreen';
 function Routes() {
     return (
         <Switch>
-            <Route path="/home" component={HomeScreen} />
+            <Route exact path="/" component={HomeScreen} />
             <Route path="/upload" />
         </Switch>
     )
