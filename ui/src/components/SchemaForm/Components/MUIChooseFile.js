@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, Grid, Input } from '@mui/material';
+import { Grid, Input } from '@mui/material';
 import { useStyles } from './Style.styles';
 
 export function MUIChooseFile({ property, onChange }) {
@@ -8,7 +8,7 @@ export function MUIChooseFile({ property, onChange }) {
         <Grid container className={classes.grid}>
             <Input
                 type='file'
-                disableUnderline="true"
+                disableUnderline={true}
                 onChange={onChange}
             />
         </Grid>

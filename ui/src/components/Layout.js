@@ -7,9 +7,9 @@ import Footer from './Footer';
 const Layout = ({ children }) => {
     return (
         <>
-            <Grid container direction="column" >
+            <Grid container justifyContent="center" direction="column" >
                 <Header />
-                <main>{children}</main>
+                <Container maxWidth="md">{children}</Container>
             </Grid>
             <Footer />
         </>

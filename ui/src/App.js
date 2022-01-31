@@ -13,7 +13,7 @@ function App() {
     <div className="App">
       <Layout>
         <Router>
-          <Route path='/' component={Routes} />
+          <Route component={Routes} />
         </Router>
       </Layout>
     </div>

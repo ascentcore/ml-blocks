@@ -1,10 +1,12 @@
 import React from 'react';
 import schema from './upload-schema.json';
 import { SchemaForm } from '@ascentcore/react-schema-form';
-import { MUICheckbox } from './Components/Checkbox';
-import MUIWrapper from './Components/Wrapper';
+import { MUICheckbox } from './Components/MUICheckbox';
+import MUIWrapper from './Components/MUIWrapper';
 import { MUISubmit } from './Components/MUISubmit';
 import { MUIChooseFile } from './Components/MUIChooseFile';
+import { MUIAddButton } from './Components/MUIAddButton';
+import { MUIRemoveButton } from './Components/MUIRemoveButton';
 
 export default function Upload() {
     function onSubmit(data, errors) {
@@ -16,7 +18,9 @@ export default function Upload() {
     const append = {
         button: { component: MUISubmit, wrapper: MUIWrapper },
         boolean: { component: MUICheckbox, wrapper: MUIWrapper },
-        file: { component: MUIChooseFile, wrapper: MUIWrapper }
+        file: { component: MUIChooseFile, wrapper: MUIWrapper },
+        addButton: { component: MUIAddButton, wrapper: MUIWrapper },
+        removeButton: { component: MUIRemoveButton, wrapper: MUIWrapper }
     }
 
     return (

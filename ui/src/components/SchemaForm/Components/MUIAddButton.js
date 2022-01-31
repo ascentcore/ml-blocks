@@ -11,6 +11,7 @@ export function MUIAddButton({ property, onChange }) {
             onClick={onChange}
             src={addIcon}
             alt='add icon'
+            required={property.isRequired}
         />
     )
 }
