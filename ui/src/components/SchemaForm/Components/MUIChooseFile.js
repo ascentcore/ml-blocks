@@ -1,16 +1,22 @@
 import React from 'react';
-import { Grid, Input } from '@mui/material';
+import { Grid, Button } from '@mui/material';
 import { useStyles } from './Style.styles';
 
 export function MUIChooseFile({ property, onChange }) {
     const classes = useStyles();
     return (
         <Grid container className={classes.grid}>
-            <Input
-                type='file'
-                disableUnderline={true}
-                onChange={onChange}
-            />
+
+            <Button
+                variant="text"
+                className={classes.chooseFile}
+                onClick={onChange}
+            >
+                <input
+                    type="file"
+                    accept="image/*"
+                />
+            </Button>
         </Grid>
     )
 }

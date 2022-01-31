@@ -43,4 +43,10 @@ export const useStyles = makeStyles((theme) => ({
             border: '1px solid red',
         },
     },
+    chooseFile: {
+        color: 'black',
+        '&:hover': {
+            backgroundColor: 'transparent',
+        },
+    }
 }))
