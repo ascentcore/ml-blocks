@@ -10,7 +10,8 @@
             "type": "array",
             "items": {
                 "type": "string",
-                "format": "binary"
+                "contentMediaType": "image/png",
+                "contentEncoding": "base64"
             }
         },
         "append": {
