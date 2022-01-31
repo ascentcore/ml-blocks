@@ -15,7 +15,7 @@ export default function Upload() {
         }
     }
 
-    const append = {
+    const customRegistry = {
         button: { component: MUISubmit, wrapper: MUIWrapper },
         boolean: { component: MUICheckbox, wrapper: MUIWrapper },
         file: { component: MUIChooseFile, wrapper: MUIWrapper },
@@ -27,7 +27,7 @@ export default function Upload() {
         <SchemaForm
             schema={schema}
             onSubmit={onSubmit}
-            config={{ registry: append }}
+            config={{ registry: customRegistry }}
         />
     )
 }
