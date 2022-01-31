@@ -7,7 +7,7 @@ export function MUICheckbox({ property }) {
     return (
         <Grid container className={classes.grid}>
             <div style={{ marginTop: 12 }}>{property.title}</div>
-            <Checkbox />
+            <Checkbox color="secondary" />
         </Grid>
     )
 }
