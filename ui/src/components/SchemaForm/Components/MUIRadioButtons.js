@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import { useStyles } from './Style.styles';
 
-export function MUIType({ property, value, onChange }) {
+export function MUIRadioButtons({ property, value, onChange }) {
     const classes = useStyles();
     const handleChange = (e) => {
         onChange(e.target.value);

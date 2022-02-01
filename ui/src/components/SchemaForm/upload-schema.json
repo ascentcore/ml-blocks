@@ -1,0 +1,22 @@
+{
+    "title": "Upload content",
+    "required": [
+        "files"
+    ],
+    "type": "object",
+    "properties": {
+        "files": {
+            "title": "Files",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "contentMediaType": "image/*",
+                "contentEncoding": "base64"
+            }
+        },
+        "append": {
+            "title": "Append",
+            "type": "boolean"
+        }
+    }
+}

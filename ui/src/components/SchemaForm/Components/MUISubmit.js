@@ -1,13 +1,12 @@
 import React from 'react';
-import { Checkbox, Grid } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { useStyles } from './Style.styles';
 
-export function MUICheckbox({ property }) {
+export function MUISubmit({ property, onChange }) {
     const classes = useStyles();
     return (
         <Grid container className={classes.grid}>
-            <div style={{ marginTop: 12 }}>{property.title}</div>
-            <Checkbox />
+            <Button variant="outlined" onClick={onChange} color="secondary">Submit</Button>
         </Grid>
     )
 }

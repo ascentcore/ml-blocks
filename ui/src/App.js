@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 import './App.css';
 import Layout from './components/Layout';
+import Routes from './Routes';
 import HomeScreen from './screens/HomeScreen';
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
     <div className="App">
       <Layout>
         <Router>
-          <Route path='/' component={HomeScreen} />
+          <Route component={Routes} />
         </Router>
       </Layout>
     </div>
