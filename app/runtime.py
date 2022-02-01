@@ -1,6 +1,7 @@
 import pickle
 
 from app.custom.custom import Custom
+from .config import settings
 
 def noop(*argv):
     pass
@@ -9,7 +10,8 @@ defaults = {
     'train': noop,
     'predict': noop,
     'generate_statics': noop,
-    'loader_config': {}
+    'loader_config': {},
+    'use_loader': None
 }
 
 class Runtime(Custom):
@@ -19,7 +21,8 @@ class Runtime(Custom):
     has_static_generation = False
 
     def __init__(self):
-        for prop in defaults.keys():
+        Custom.__init__(self, settings)
+        for prop in defaults.keys():         
             if hasattr(self, prop) == False:
                 setattr(self, prop, defaults[prop])
 

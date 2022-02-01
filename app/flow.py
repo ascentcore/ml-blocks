@@ -1,9 +1,7 @@
 import logging
 import os
-from app.loaders.pandas import PandasLoader
-from app.loaders.archive import ArchiveLoader
 from app.config import settings
-
+from app.loaders import get_loader
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -18,8 +16,10 @@ class Flow():
     runtime = Runtime()
 
     def __init__(self):
+        loader_class = get_loader(self.runtime.use_loader)      
+        self.loader = loader_class(self.runtime.loader_config)
 
-        self.loader = PandasLoader(self.runtime.loader_config)
+        logger.info(f'Initialized block with {loader_class.__name__} instance')
 
         try:
             os.mkdir(statics_folder)
@@ -37,7 +37,7 @@ class Flow():
         self.loader.load_files(content, append)
         logger.info('Data loading complete')
 
-    def process_data(self, extras):
+    def process_data(self, extras = None):
         logger.info('Processing dataset')
 
         if hasattr(self.runtime, 'process_dataset'):

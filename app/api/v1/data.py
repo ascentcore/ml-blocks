@@ -29,6 +29,14 @@ def create_upload_file(
 def get_dataset_length(flow: Flow = Depends(get_flow)):
     return flow.loader.count()
 
+@router.put("/process_data")
+def process_data(
+    background_tasks: BackgroundTasks,
+    flow: Flow = Depends(get_flow)):
+    
+    # background_tasks.add_task(flow.process_data)
+    flow.process_data()
+
 @router.get("/")
 def get_dataset_length(
     page: int = 0,

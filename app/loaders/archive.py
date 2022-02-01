@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 class ArchiveLoader(Loader):
 
     files_folder = f'{settings.MOUNT_FOLDER}/files'
-    dataset = []
+    data = []
 
-    def __init__(self):
+    def __init__(self, config):
         logger.info('[ZIP Archive Loader] initialized')
         self.recreate_dataset()
 
     def recreate_dataset(self):
-        self.dataset = []
+        self.data = []
         try:
             os.mkdir(self.files_folder)
         except:
@@ -31,10 +31,10 @@ class ArchiveLoader(Loader):
 
         for root, d_names, f_names in os.walk(self.files_folder):
             for f in f_names:
-                self.dataset.append(os.path.join(root, f))
+                self.data.append(os.path.join(root, f))
 
     def count(self):
-        return len(self.dataset)
+        return len(self.data)
 
     def load_files(self, files, append=False):
         logger.info('Loading files started')
@@ -87,7 +87,7 @@ class ArchiveLoader(Loader):
 
     def load_data(self, page=0, count=10):
         offset = page * count
-        file_list = self.dataset[offset:offset+count]
+        file_list = self.data[offset:offset+count]
         response = []
         for file_name in file_list:
             f = open(file_name, "rb")
@@ -96,7 +96,7 @@ class ArchiveLoader(Loader):
 
     def looad_from_store(self):
         # return path names so far
-        return self.dataset
+        return self.data
 
     def default_process(self):
         pass
