@@ -5,8 +5,7 @@ from app.db.base_class import Base
 class Dependency(Base): 
     __tablename__ = 'dependency'
 
-    id = Column(Integer, primary_key=True, index=True) 
-    dependency = Column(String(256), nullable=False)
+    dependency = Column(String(256), primary_key=True, nullable=False)
 
 class Settings(Base):
     __tablename__ = 'settings'

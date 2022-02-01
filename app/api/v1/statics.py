@@ -25,6 +25,4 @@ def generate_statics(
 @router.get("/")
 def get_dataset_length(flow: Flow = Depends(get_flow)):
     test = flow.list_statics()
-    print('####')
-    print(test)
     return test

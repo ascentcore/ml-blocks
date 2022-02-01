@@ -20,7 +20,6 @@ class Runtime(Custom):
 
     def __init__(self):
         for prop in defaults.keys():
-            print('###', prop)
             if hasattr(self, prop) == False:
                 setattr(self, prop, defaults[prop])
 

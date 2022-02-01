@@ -1,13 +1,16 @@
+from asyncio import events
 import logging
 import asyncio
 
 from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 
+from starlette.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.flow import Flow, statics_folder
-from app.deps import get_flow
+from app.deps import get_flow, get_orm_db
+from app.events import db_cleanup
 
 from .broker import connect_to_queue
 
@@ -16,7 +19,6 @@ from .config import settings
 
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
-
 
 app = FastAPI()
 
@@ -30,15 +32,20 @@ app.add_middleware(
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-app.mount("/", StaticFiles(directory="/app/ui/", html=True), name="static")
+# app.mount("/ui/", StaticFiles(directory="/app/ui/build", html=True), name="static")
 app.mount("/api/v1/download",
           StaticFiles(directory=statics_folder), name="generated")
+
 
 task = None
 
 @app.on_event('startup')
-async def startup(flow: Flow = Depends(get_flow)):
-    global task
+async def startup(
+        flow: Flow = Depends(get_flow)):    
+    
+    db_cleanup()
+
+    global task    
     logger.info('ML-Blocks startup complete...')
     loop = asyncio.get_event_loop()
     task = loop.create_task(connect_to_queue(loop, flow))

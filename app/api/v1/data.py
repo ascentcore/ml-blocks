@@ -22,14 +22,12 @@ def create_upload_file(
         append: bool = Form(None),
         extras: str = Form(None),
         flow: Flow = Depends(get_flow)):
-    print("Extras", extras)
     background_tasks.add_task(flow.start_data_ingest, files, append, extras)
     return {"message": "Started data processing"}
 
 @router.get("/count")
 def get_dataset_length(flow: Flow = Depends(get_flow)):
     return flow.loader.count()
-
 
 @router.get("/")
 def get_dataset_length(

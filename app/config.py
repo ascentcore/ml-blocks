@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     MOUNT_FOLDER: str = "/app/data"
     MESSAGE_BROKER: str = os.getenv("MESSAGE_BROKER", None)
     DEPENDENCY: str = os.getenv("DEPENDENCY", "MLBlock")
+    DEPENDENCY_BLOCK: str = os.getenv("DEPENDENCY_BLOCK", None)
    
     class Config:
         case_sensitive = True
