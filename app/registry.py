@@ -86,12 +86,15 @@ class Registry():
         selected_type = common_types[0]
         
         count_req = requests.get(f'{upstream_dep}v1/data/count')
+        
         count = int(count_req.text)
+        logger.info(f'Upstream dependency has {count} items to process')
 
-        page = 0
-        page_size = 2000
+        page_size = 100
 
         reps = int(count / page_size) + 1
+
+        logger.info(f'Number of iterations to process {reps}')
 
         for i in range(0, reps):
             content = requests.get(f'{upstream_dep}v1/data?page={i}&count={page_size}&format={selected_type}')

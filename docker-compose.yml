@@ -18,8 +18,8 @@ services:
       - LOADER=archive
     ports:
       - "9080:80"
-    command: [ "/app/start_dev.sh" ]
-    # command: ["/app/start.sh"]
+    # command: [ "/app/start_dev.sh" ]
+    command: ["/app/start.sh"]
     networks:
         - ml-blocks-net
 
@@ -40,8 +40,8 @@ services:
         - INSTALL_DEV=true
     ports:
       - "9081:80"
-    command: [ "/app/start_dev.sh" ]
-    # command: ["/app/start.sh"]
+    # command: [ "/app/start_dev.sh" ]
+    command: ["/app/start.sh"]
     networks:
         - ml-blocks-net  
   

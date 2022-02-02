@@ -17,25 +17,24 @@ logger = logging.getLogger(__name__)
 class ArchiveLoader(Loader):
 
     files_folder = f'{settings.MOUNT_FOLDER}/files'
-    data = []
 
     def __init__(self, config):
-        logger.info('[ZIP Archive Loader] initialized')
-        self.recreate_dataset()
+        logger.info('[ZIP Archive Loader] initialized')        
 
-    def recreate_dataset(self):
-        self.data = []
+    def get_dataset(self):
+        data = []
         try:
             os.mkdir(self.files_folder)
         except:
             pass
-
         for root, d_names, f_names in os.walk(self.files_folder):
             for f in f_names:
-                self.data.append(os.path.join(root, f))
+                data.append(os.path.join(root, f))
+
+        return data
 
     def count(self):
-        return len(self.data)
+        return len(self.get_dataset())
 
     def clean(self):
         try:
@@ -89,14 +88,14 @@ class ArchiveLoader(Loader):
                 zip_ref.close()
                 os.remove(file_name)
 
-        self.recreate_dataset()
-
     def load_data(self, page=0, count=10, format=''):
         resp = None
 
+        data = self.get_dataset()
+
         if format == 'application/json':
             offset = page * count
-            file_list = self.data[offset:offset+count]
+            file_list = data[offset:offset+count]
             resp = []
             for file_name in file_list:
                 f = open(file_name, "rb")
@@ -109,13 +108,13 @@ class ArchiveLoader(Loader):
             resp = 'ZIP format not implemented'
         else:
             resp = FileResponse(
-                self.data[page], filename=self.data[page].split("/")[-1])
+                data[page], filename=data[page].split("/")[-1])
         
         return resp
 
     def looad_from_store(self):
         # return path names so far
-        return self.data
+        return self.get_dataset()
 
     def default_process(self):
         pass

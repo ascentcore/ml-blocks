@@ -14,4 +14,8 @@ router = APIRouter()
 def get_status(
     flow: Flow = Depends(get_flow)
 ):
-    return flow.runtime.name
+    return {
+        "name": flow.runtime.name,
+        "status": "not implemented",
+        "export_formats": flow.loader.export_content_types()
+    }
