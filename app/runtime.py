@@ -7,11 +7,12 @@ def noop(*argv):
     pass
 
 defaults = {
+    'initialize': noop,
     'train': noop,
     'predict': noop,
     'generate_statics': noop,
     'loader_config': {},
-    'use_loader': None
+    'use_loader': None    
 }
 
 class Runtime(Custom):
@@ -21,10 +22,11 @@ class Runtime(Custom):
     has_static_generation = False
 
     def __init__(self):
-        Custom.__init__(self, settings)
         for prop in defaults.keys():         
             if hasattr(self, prop) == False:
                 setattr(self, prop, defaults[prop])
+
+        self.initialize(settings)
 
         if hasattr(self, 'load_model'):
             self.model = self.load_model()

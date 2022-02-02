@@ -1,6 +1,8 @@
+from numpy import isin
 import pandas as pd
 import logging
 import sqlite3 as sql
+import json
 
 from app.config import settings
 
@@ -8,6 +10,7 @@ from .loader import Loader
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class PandasLoader(Loader):
 
@@ -18,15 +21,23 @@ class PandasLoader(Loader):
     def get_connection(self):
         return sql.connect(f'{settings.MOUNT_FOLDER}/data.db')
 
-    def load_files(self, files, append):        
+    def load_files(self, files, append):
         logger.info('Loading files started')
         method = self.config.get('loader_method', 'read_csv')
         config = self.config.get('load_config', {})
-        self.data = [getattr(pd, method)(file.file, **config) for file in files]
+        self.data = [getattr(pd, method)(file.file, **config)
+                     for file in files]
+        self.append = append
+
+    def load_content(self, content, format, append):
+        content = content.json()        
+        self.data = pd.DataFrame(content)
+        print(self.data)
         self.append = append
 
     def default_process(self):
-        self.data = self.data[0]
+        if isinstance(self.data, list):
+            self.data = pd.concat(self.data)        
 
     def count(self):
         conn = self.get_connection()
@@ -42,7 +53,7 @@ class PandasLoader(Loader):
     def store_to_db(self):
         conn = self.get_connection()
         replace = ('append' if self.append == True else 'replace')
-        self.data.to_sql('raw_data', conn, index = False, if_exists = replace)
+        self.data.to_sql('raw_data', conn, index=False, if_exists=replace)
         conn.close()
 
     def load_from_store(self):
@@ -51,13 +62,13 @@ class PandasLoader(Loader):
         conn.close()
         return df
 
-    def load_data(self, page = 0, count = 10):
+    def load_data(self, page=0, count=10, format=''):
         conn = self.get_connection()
-        cur = conn.cursor()
-        cur.execute(f'SELECT * from "raw_data" LIMIT {page * count},{count}')
-        cur_result = cur.fetchall()
-        conn.close()
-        return cur_result
+        df = pd.read_sql_query(
+            f'SELECT * from "raw_data" LIMIT {page * count},{count}', conn)
+        return json.loads(df.to_json(orient="records"))
 
-    def store_to_file(self):
-        self.data.to_json(f'{settings.MOUNT_FOLDER}/data.json')
+    def export_content_types(self):
+        return [
+            'application/json'
+        ]

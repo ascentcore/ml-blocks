@@ -6,6 +6,7 @@ import zipfile
 import base64
 
 from app.config import settings
+from fastapi.responses import FileResponse, Response
 
 from .loader import Loader
 
@@ -36,6 +37,15 @@ class ArchiveLoader(Loader):
     def count(self):
         return len(self.data)
 
+    def clean(self):
+        try:
+            shutil.rmtree(self.files_folder)
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))
+
+    def load_content(self, content, format, append):
+        return self.load(content, append)
+
     def load_files(self, files, append=False):
         logger.info('Loading files started')
 
@@ -52,13 +62,9 @@ class ArchiveLoader(Loader):
             print("Error: %s - %s." % (e.filename, e.strerror))
 
         os.mkdir(temp_folder)
-
         # prepare file storage
         if append == False:
-            try:
-                shutil.rmtree(self.files_folder)
-            except OSError as e:
-                print("Error: %s - %s." % (e.filename, e.strerror))
+            self.clean()
 
         try:
             os.mkdir(self.files_folder)
@@ -85,14 +91,27 @@ class ArchiveLoader(Loader):
 
         self.recreate_dataset()
 
-    def load_data(self, page=0, count=10):
-        offset = page * count
-        file_list = self.data[offset:offset+count]
-        response = []
-        for file_name in file_list:
-            f = open(file_name, "rb")
-            response.append(base64.b64encode(f.read()))
-        return response
+    def load_data(self, page=0, count=10, format=''):
+        resp = None
+
+        if format == 'application/json':
+            offset = page * count
+            file_list = self.data[offset:offset+count]
+            resp = []
+            for file_name in file_list:
+                f = open(file_name, "rb")
+                filename = file_name.split("/")[-1]
+                resp.append({
+                    "name": filename,
+                    "base64encoded": base64.b64encode(f.read())}
+                )
+        elif format == 'application/zip':
+            resp = 'ZIP format not implemented'
+        else:
+            resp = FileResponse(
+                self.data[page], filename=self.data[page].split("/")[-1])
+        
+        return resp
 
     def looad_from_store(self):
         # return path names so far
@@ -104,8 +123,10 @@ class ArchiveLoader(Loader):
     def store(self):
         pass
 
-    def store_to_db(self):
-        pass
-
-    def store_to_file(self):
-        pass
+    
+    def export_content_types(self):
+        return [
+            'application/zip',
+            'application/binary',
+            'application/json'
+        ]

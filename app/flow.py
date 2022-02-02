@@ -16,7 +16,8 @@ class Flow():
     runtime = Runtime()
 
     def __init__(self):
-        loader_class = get_loader(self.runtime.use_loader)      
+        loader_name = os.getenv("LOADER", self.runtime.use_loader)
+        loader_class = get_loader(loader_name)
         self.loader = loader_class(self.runtime.loader_config)
 
         logger.info(f'Initialized block with {loader_class.__name__} instance')
@@ -28,6 +29,9 @@ class Flow():
 
     def start_data_ingest(self, content, append, extras):
         self.add_data(content, append)
+        self.process_loaded_data(extras)
+    
+    def process_loaded_data(self, extras):
         self.process_data(extras)
         self.store_data()
         self.generate_statics()

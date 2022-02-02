@@ -1,16 +1,14 @@
 import asyncio
 import logging
-from turtle import delay
 import requests
 from app.db import models
+from app.flow import Flow
 
 from .config import settings
 
 logger = logging.getLogger(__name__)
 
 class Registry():
-
-    downstream_dependencies = []
 
     connected = False
 
@@ -27,11 +25,13 @@ class Registry():
         db.commit()
         db.refresh(dependency)
 
-    def dependencies(self):
-        return self.downstream_dependencies
+
+    def get_dependency_url(self):
+        return f'http://{settings.DEPENDENCY_BLOCK}/api/'
 
     async def try_connect(self):
-        result = requests.put(f'http://{settings.DEPENDENCY_BLOCK}/api/v1/pipeline/register')
+        dependency = self.get_dependency_url()
+        result = requests.put(f'{dependency}v1/pipeline/register')
         return result.status_code == 200
 
     async def do_connect(self):
@@ -63,4 +63,40 @@ class Registry():
             loop.create_task(self.do_connect())
         else:
             asyncio.run(self.do_connect())
+
+    def notify_downstream(self, db):
+        dependencies = db.query(models.Dependency).all()
+        for dep in dependencies:
+            logger.info(f'Notifying downstream dependency: {dep.dependency}')
+            requests.post(f'http://{dep.dependency}/api/v1/pipeline/rebuild')
+
+
+    def rebuild_from_upstream(self, flow: Flow):
+        upstream_dep = self.get_dependency_url()        
+        upstream_content_types_req = requests.get(f'{upstream_dep}v1/pipeline/content_types')
+
+        upstream_content_types = upstream_content_types_req.json()
+        loader_content_types = flow.loader.export_content_types()
+        
+        common_types = list(set(upstream_content_types).intersection(loader_content_types))
+
+        if len(common_types) == 0:
+            raise RuntimeError("Upstream dependency is not exporting data in a format common to the current block") 
+
+        selected_type = common_types[0]
+        
+        count_req = requests.get(f'{upstream_dep}v1/data/count')
+        count = int(count_req.text)
+
+        page = 0
+        page_size = 2000
+
+        reps = int(count / page_size) + 1
+
+        for i in range(0, reps):
+            content = requests.get(f'{upstream_dep}v1/data?page={i}&count={page_size}&format={selected_type}')
+            flow.loader.load_content(content, selected_type, i != 0)
+            flow.process_loaded_data(None)
+
+        
     
