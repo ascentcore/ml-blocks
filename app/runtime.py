@@ -1,6 +1,6 @@
 import pickle
 
-from app.custom.custom import Custom
+from app.custom.block import Block
 from .config import settings
 
 def noop(*argv):
@@ -15,7 +15,7 @@ defaults = {
     'use_loader': None    
 }
 
-class Runtime(Custom):
+class Runtime(Block):
 
     model = None
 

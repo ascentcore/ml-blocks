@@ -1,2 +1,2 @@
-class Custom:
+class Block:
     name = "MLBlock"

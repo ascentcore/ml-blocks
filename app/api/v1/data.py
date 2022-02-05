@@ -19,7 +19,7 @@ router = APIRouter()
 
 def ingest_data_and_notify_downstream(flow, registry, files, append, extras, db):
     logger.info('Started data processing ...')
-    flow.start_data_ingest(files, append, extras)
+    flow.start_data_ingest(db, files, append, extras)
     logger.info('Notifying downstream dependencies ....')
     registry.notify_downstream(db)
     logger.info('Ingestion complete')

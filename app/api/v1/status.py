@@ -2,7 +2,8 @@ import logging
 from fastapi import APIRouter, Depends, Request
 
 from app.flow import Flow
-from app.deps import get_flow
+from app.deps import get_flow, get_orm_db
+from app.db.crud import get_status, get_dependencies
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,11 +12,13 @@ router = APIRouter()
 
 
 @router.get("/")
-def get_status(
-    flow: Flow = Depends(get_flow)
+def current_status(
+    flow: Flow = Depends(get_flow),
+    db = Depends(get_orm_db)
 ):
     return {
-        "name": flow.runtime.name,
-        "status": "not implemented",
-        "export_formats": flow.loader.export_content_types()
+        # "name": flow.runtime.name,
+        "status": get_status(db),
+        "export_formats": flow.loader.export_content_types(),
+        "dependencies": get_dependencies(db)
     }

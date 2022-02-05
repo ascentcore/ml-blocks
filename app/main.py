@@ -1,17 +1,17 @@
-from asyncio import events
 import logging
 import asyncio
 
 from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 
-from starlette.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.flow import Flow, statics_folder
-from app.deps import get_flow, get_orm_db
-from app.events import db_cleanup
+from app.deps import get_flow
+from app.db.crud import set_status, cleanup
+from app.constants import stages
 
+from app.db import session
 from .broker import connect_to_queue
 
 from .api.v1 import api_router
@@ -39,16 +39,19 @@ app.mount("/api/v1/download",
 
 task = None
 
+
 @app.on_event('startup')
 async def startup(
-        flow: Flow = Depends(get_flow)):    
-    
-    db_cleanup()
+        flow: Flow = Depends(get_flow)):
 
-    global task    
+    db = session.SessionLocal()
+    cleanup(db)
+    set_status(db, 'pending')
+    global task
     logger.info('ML-Blocks startup complete...')
     loop = asyncio.get_event_loop()
     task = loop.create_task(connect_to_queue(loop, flow))
+
 
 @app.on_event('shutdown')
 async def shutdown():

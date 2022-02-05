@@ -1,6 +1,5 @@
 import logging
-import requests
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, BackgroundTasks
 from app.flow import Flow
 
 from app.registry import Registry
@@ -48,12 +47,15 @@ def get_loader(flow: Flow = Depends(get_flow)):
 
 @router.post("/rebuild")
 def rebuild(
+        background_tasks: BackgroundTasks,
         flow: Flow = Depends(get_flow),
-        registry: Registry = Depends(get_registry)):
+        registry: Registry = Depends(get_registry),
+        db=Depends(get_orm_db)):
 
-    registry.rebuild_from_upstream(flow)
+    background_tasks.add_task(registry.rebuild_from_upstream, flow, db)
 
     if registry.connected:
+        logger.info('Rebuilding...')
         pass
     else:
         logger.info('Unable to rebuild. Not connected to dependency')

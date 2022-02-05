@@ -16,6 +16,8 @@ class Settings(Base):
 
 class Status(Base):
     __tablename__ = 'status'
-
-    state = Column(String(256), nullable=False, primary_key=True)
-    time = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    id = Column(Integer, primary_key=True)    
+    state = Column(Integer, nullable=False)
+    state_name = Column(String(256), nullable=False)
+    time = Column(DateTime(timezone=True), default=func.now())

@@ -45,7 +45,7 @@ class PandasLoader(Loader):
         cur.execute('SELECT COUNT(*) from "raw_data"')
         cur_result = cur.fetchone()
         conn.close()
-        return cur_result
+        return cur_result[0]
 
     def store(self):
         self.store_to_db()
