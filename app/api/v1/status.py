@@ -17,7 +17,7 @@ def current_status(
     db = Depends(get_orm_db)
 ):
     return {
-        # "name": flow.runtime.name,
+        "name": flow.runtime.name,
         "status": get_status(db),
         "export_formats": flow.loader.export_content_types(),
         "dependencies": get_dependencies(db)
