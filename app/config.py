@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     MESSAGE_BROKER: str = os.getenv("MESSAGE_BROKER", None)
     DEPENDENCY: str = os.getenv("DEPENDENCY", "MLBlock")
     DEPENDENCY_BLOCK: str = os.getenv("DEPENDENCY_BLOCK", None)
+    REGISTRY: str = os.getenv("REGISTRY", None)
    
     class Config:
         case_sensitive = True

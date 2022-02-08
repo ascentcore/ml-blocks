@@ -4,8 +4,14 @@ from app.db.base_class import Base
 
 class Dependency(Base): 
     __tablename__ = 'dependency'
-
     dependency = Column(String(256), primary_key=True, nullable=False)
+
+
+class Graph(Base): 
+    __tablename__ = 'graph'
+    id = Column(Integer)    
+    upstream = Column(String(256), nullable=False, primary_key=True)
+    downstream = Column(String(256), nullable=False, primary_key=True)
 
 class Settings(Base):
     __tablename__ = 'settings'
