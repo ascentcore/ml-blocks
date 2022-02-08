@@ -1,7 +1,9 @@
 import logging
-from fastapi import APIRouter, Depends, Request, BackgroundTasks
-from app.flow import Flow
+from typing import Optional
 
+from fastapi import APIRouter, Depends, Query, Request, BackgroundTasks
+from app.flow import Flow
+from app.config import settings
 from app.registry import Registry
 from app.db import models
 
@@ -21,6 +23,20 @@ def register(
 ):
     registry.register(db, request.client.host)
 
+@router.put("/edge")
+def edge(
+    request: Request,
+    downstream: str,
+    upstream: Optional[str] = Query(None),
+    db=Depends(get_orm_db),
+    registry: Registry = Depends(get_registry)
+):
+    registry.create_edge(db, upstream if upstream != None else request.client.host, downstream)
+
+
+@router.get("/graph")
+def graph(db=Depends(get_orm_db)):
+    return db.query(models.Graph).all()
 
 @router.get("/dependencies")
 def register(db=Depends(get_orm_db)):
@@ -33,7 +49,6 @@ def status(registry: Registry = Depends(get_registry)):
         "connected": registry.connected,
         "dependency_url": registry.get_dependency_url()
     }
-
 
 @router.get("/loader")
 def get_loader(flow: Flow = Depends(get_flow)):
