@@ -27,4 +27,3 @@ volumes:
 
 networks:
   ml-blocks-net:
-    driver: bridge
