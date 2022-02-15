@@ -22,3 +22,15 @@ def current_status(
         "export_formats": flow.loader.export_content_types(),
         "dependencies": get_dependencies(db)
     }
+
+@router.get("/test")
+def current_status(
+    flow: Flow = Depends(get_flow),
+    db = Depends(get_orm_db)
+):
+    return {
+        "name": flow.runtime.name,
+        "status": get_status(db),
+        "export_formats": flow.loader.export_content_types(),
+        "dependencies": get_dependencies(db)
+    }
