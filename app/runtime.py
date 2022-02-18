@@ -27,16 +27,25 @@ class Runtime(Block):
                 setattr(self, prop, defaults[prop])
 
         self.initialize(settings)
+        self.has_static_generation = self.generate_statics != noop
+        self._load_model()
 
+    def _load_model(self):
         if hasattr(self, 'load_model'):
             self.model = self.load_model()
         else:
             try:
-                infile = open('/app/data/model/model.pkl', 'rb')
+                infile = open(f'{settings.MOUNT_FOLDER}/model.pkl', 'rb')
                 self.model = pickle.load(infile)
                 infile.close()
             except:
                 pass
 
+        return self.model
 
-        self.has_static_generation = self.generate_statics != noop
+    def store_model(self, model):
+        self.model = model
+        if hasattr(self, 'save_model'):
+            self.save_model(model)
+        else:
+            pickle.dump(model, open(f'{settings.MOUNT_FOLDER}/model.pkl', 'wb'))

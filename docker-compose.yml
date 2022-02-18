@@ -6,7 +6,8 @@ services:
       - .:/app
       - ./app/block:/app/app/block
       - ./stores/data_root:/app/data
-      - ./requirements.txt:/app/requirements_local.txt
+      - ./test:/app/app/custom
+      - ./requirements_local.txt:/app/requirements_local.txt
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,11 +15,11 @@ services:
         - INSTALL_DEV=true
 
     environment:
-      - LOADER=archive
+      - LOADER=pandas
     ports:
       - "9080:80"
-    # command: [ "/app/start_dev.sh" ]
-    command: ["/app/start.sh"]
+    command: [ "/app/start_dev.sh" ]
+    # command: ["/app/start.sh"]
     networks:
         - ml-blocks-net
         

@@ -1,3 +1,4 @@
+from re import M
 from app.db.crud import set_status
 from app.runtime import Runtime
 import logging
@@ -13,11 +14,10 @@ statics_folder = f'{settings.MOUNT_FOLDER}/statics'
 
 class Flow():
 
-    loader = None
-
-    runtime = Runtime()
+    
 
     def __init__(self):
+        self.runtime = Runtime()
         loader_name = os.getenv("LOADER", self.runtime.use_loader)
         loader_class = get_loader(loader_name)
         self.loader = loader_class(self.runtime.loader_config)
@@ -35,6 +35,16 @@ class Flow():
         set_status(db, 'processing')
         self.process_loaded_data(db, extras)
         self.generate_statics(db)
+        self.train()
+        self.set_pending(db)
+
+    def train(self, db):
+        set_status(db, 'training')
+        model = self.runtime.train(self.loader)
+        self.runtime.store_model(model)
+
+    def retrain(self, db):
+        self.train(db)
         self.set_pending(db)
 
     def process_loaded_data(self, db, extras, update_status = True):

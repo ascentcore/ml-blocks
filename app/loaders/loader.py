@@ -20,3 +20,6 @@ class Loader:
 
     def export_content_types(self):
         pass
+
+    async def load_request(self, request):
+        pass

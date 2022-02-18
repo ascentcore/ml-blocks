@@ -62,6 +62,10 @@ class PandasLoader(Loader):
         conn.close()
         return df
 
+    async def load_request(self, request):
+        json_data = await request.json()
+        return pd.DataFrame(json_data)
+
     def load_data(self, page=0, count=10, format=''):
         conn = self.get_connection()
         df = pd.read_sql_query(
