@@ -111,6 +111,7 @@ class Registry():
             flow.loader.load_content(content, selected_type, i != 0)
             flow.process_loaded_data(db, None, False)
 
+        flow.train(db)
         flow.generate_statics(db)
         flow.set_pending(db)
         self.notify_downstream(db)

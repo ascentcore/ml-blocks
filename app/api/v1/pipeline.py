@@ -3,7 +3,7 @@ import requests
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, Request, BackgroundTasks, Response
+from fastapi import APIRouter, Depends, Query, Request, BackgroundTasks, Response, Body
 from app.flow import Flow
 from app.config import settings
 from app.registry import Registry
@@ -87,4 +87,14 @@ def get_loader(ip: str, path: str):
     t_resp = requests.get(f'http://{ip}/{path}')
     response = Response(content=t_resp.content, status_code=t_resp.status_code, headers={
                         'content-type': 'application/json'})
+    return response
+
+
+@router.post("/proxy")
+async def post_proxy(ip: str, path: str, request: Request):
+    body = await request.json()
+    t_resp = requests.post(f'http://{ip}/{path}', json = body)
+    response = Response(content=t_resp.content, status_code=t_resp.status_code, headers={
+                        'content-type': 'application/json'})
+
     return response
