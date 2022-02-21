@@ -34,9 +34,9 @@ class Flow():
         set_status(db, 'ingesting')
         self.add_data(content, append)
         set_status(db, 'processing')
-        self.process_loaded_data(db, extras)
-        self.generate_statics(db)
+        self.process_loaded_data(db, extras)        
         self.train(db)
+        self.generate_statics(db)
         self.set_pending(db)
 
     def train(self, db):
