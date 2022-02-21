@@ -22,6 +22,7 @@ class Runtime(Block):
     has_static_generation = False
 
     def __init__(self):
+        super().__init__()
         for prop in defaults.keys():         
             if hasattr(self, prop) == False:
                 setattr(self, prop, defaults[prop])

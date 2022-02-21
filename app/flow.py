@@ -18,6 +18,7 @@ class Flow():
 
     def __init__(self):
         self.runtime = Runtime()
+        self.runtime.statics_folder = statics_folder
         loader_name = os.getenv("LOADER", self.runtime.use_loader)
         loader_class = get_loader(loader_name)
         self.loader = loader_class(self.runtime.loader_config)
