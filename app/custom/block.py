@@ -1,2 +1,4 @@
+import os
+
 class Block:
-    name = "MLBlock"
+    name = os.getenv("BLOCK_NAME", "Pass Through ML Block")
