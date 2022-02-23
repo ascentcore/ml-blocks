@@ -21,3 +21,7 @@ async def predict(request: Request, flow: Flow = Depends(get_flow)):
     data = await flow.loader.load_request(request)
     predicts = flow.runtime.predict(data)
     return predicts
+
+@router.get("/predict_schema")
+async def get_interract_schema(flow: Flow = Depends(get_flow)):
+    return flow.runtime.predict_schema()

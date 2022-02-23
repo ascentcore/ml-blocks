@@ -11,6 +11,7 @@ defaults = {
     'train': noop,
     'predict': noop,
     'generate_statics': noop,
+    'predict_schema': noop,
     'loader_config': {},
     'use_loader': None    
 }
