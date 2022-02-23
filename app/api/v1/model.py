@@ -18,7 +18,7 @@ async def train(background_tasks: BackgroundTasks, flow: Flow = Depends(get_flow
 
 @router.post("/predict")
 async def predict(request: Request, flow: Flow = Depends(get_flow)):
-    data = await flow.loader.load_request(request)
+    data = await flow.loader.load_request(request)    
     predicts = flow.runtime.predict(data)
     return predicts
 

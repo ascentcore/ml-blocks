@@ -46,6 +46,7 @@ class Flow():
 
     def retrain(self, db):
         self.train(db)
+        self.generate_statics(db)
         self.set_pending(db)
 
     def process_loaded_data(self, db, extras, update_status = True):
