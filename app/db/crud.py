@@ -1,4 +1,4 @@
-from .models import Dependency, Status, Graph
+from .models import  Status, Graph
 from app.constants import stages
 
 def set_status(db, status):
@@ -9,16 +9,13 @@ def set_status(db, status):
 
     return status
 
+def get_graph(db):
+    return db.query(Graph).all()
 
 def get_status(db):
     return db.query(Status).order_by(Status.id.desc()).all()
 
 
-def get_dependencies(db):
-    return db.query(Dependency).all()
-
-
 def cleanup(db):    
-    db.query(Dependency).delete()
     db.query(Graph).delete()    
     db.query(Status).delete()

@@ -6,23 +6,94 @@ services:
       - .:/app
       - ./app/block:/app/app/block
       - ./stores/data_root:/app/data
-      - ./test:/app/app/custom
       - ./requirements_local.txt:/app/requirements_local.txt
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - INSTALL_DEV=true
-
     environment:
       - LOADER=pandas
     ports:
       - "9080:80"
-    command: [ "/app/start_dev.sh" ]
-    # command: ["/app/start.sh"]
+    # command: [ "/app/start_dev.sh" ]
+    command: [ "/app/start.sh" ]
     networks:
-        - ml-blocks-net
-        
+      - ml-blocks-net
+
+  app_layer_1:
+    depends_on:
+      - app_root_ds
+    volumes:
+      - .:/app
+      - ./app/block:/app/app/block
+      - ./stores/app_layer_1:/app/data
+      - ./requirements_local.txt:/app/requirements_local.txt
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - INSTALL_DEV=true
+    environment:
+      - LOADER=pandas
+      - UPSTREAM_DATA_BLOCK=app_root_ds
+      - REGISTRY=app_root_ds
+    ports:
+      - "9081:80"
+    # command: [ "/app/start_dev.sh" ]
+    command: [ "/app/start.sh" ]
+    networks:
+      - ml-blocks-net
+
+  app_layer_2:
+    depends_on:
+      - app_layer_1
+    volumes:
+      - .:/app
+      - ./app/block:/app/app/block
+      - ./stores/app_layer_2:/app/data
+      - ./requirements_local.txt:/app/requirements_local.txt
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - INSTALL_DEV=true
+    environment:
+      - LOADER=pandas
+      - UPSTREAM_DATA_BLOCK=app_layer_1
+      - REGISTRY=app_root_ds
+    ports:
+      - "9082:80"
+    # command: [ "/app/start_dev.sh" ]
+    command: ["/app/start.sh"]
+    networks:
+      - ml-blocks-net
+
+  app_layer_3:
+    depends_on:
+      - app_layer_1
+      - app_layer_2
+    volumes:
+      - .:/app
+      - ./app/block:/app/app/block
+      - ./stores/app_layer_3:/app/data
+      - ./requirements_local.txt:/app/requirements_local.txt
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - INSTALL_DEV=true
+    environment:
+      - LOADER=pandas
+      - DEPENDENCY_BLOCKS=app_layer_1,app_layer_2
+      - REGISTRY=app_root_ds
+    ports:
+      - "9083:80"
+    # command: [ "/app/start_dev.sh" ]
+    command: ["/app/start.sh"]
+    networks:
+      - ml-blocks-net
+
 volumes:
   store-data-volume: null
 

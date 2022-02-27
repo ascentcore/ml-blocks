@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 
 SQLALCHEMY_DATABASE_URI = "sqlite:///data/session.db"
 
-
 engine = create_engine(
     SQLALCHEMY_DATABASE_URI,
     # required for sqlite

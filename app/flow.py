@@ -14,8 +14,6 @@ statics_folder = f'{settings.MOUNT_FOLDER}/statics'
 
 class Flow():
 
-    
-
     def __init__(self):
         self.runtime = Runtime()
         self.runtime.statics_folder = statics_folder

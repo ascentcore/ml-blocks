@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     MOUNT_FOLDER: str = "/app/data"
     MESSAGE_BROKER: str = os.getenv("MESSAGE_BROKER", None)
-    DEPENDENCY: str = os.getenv("DEPENDENCY", "MLBlock")
-    DEPENDENCY_BLOCK: str = os.getenv("DEPENDENCY_BLOCK", None)
+    DEPENDENCY_BLOCKS: str = os.getenv("DEPENDENCY_BLOCKS", None)
+    UPSTREAM_DATA_BLOCK: str = os.getenv("UPSTREAM_DATA_BLOCK", None)
     REGISTRY: str = os.getenv("REGISTRY", None)
    
     class Config:

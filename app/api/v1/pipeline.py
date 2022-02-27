@@ -29,13 +29,14 @@ def register(
 @router.put("/edge")
 def edge(
     request: Request,
+    edge_type: int,
     downstream: str,
     upstream: Optional[str] = Query(None),
     db=Depends(get_orm_db),
     registry: Registry = Depends(get_registry)
 ):
     registry.create_edge(db, upstream if upstream !=
-                         None else request.client.host, downstream)
+                         None else request.client.host, downstream, edge_type)
 
 
 @router.get("/graph")
@@ -72,15 +73,8 @@ def rebuild(
         flow: Flow = Depends(get_flow),
         registry: Registry = Depends(get_registry),
         db=Depends(get_orm_db)):
-
     background_tasks.add_task(registry.rebuild_from_upstream, flow, db)
-
-    if registry.connected:
-        logger.info('Rebuilding...')
-        pass
-    else:
-        logger.info('Unable to rebuild. Not connected to dependency')
-
+    # registry.rebuild_from_upstream(flow, db)
 
 @router.get("/proxy")
 def get_loader(ip: str, path: str):

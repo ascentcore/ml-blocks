@@ -3,3 +3,6 @@ states = ["booting", "empty", "ingesting",
 
 
 stages = {f'{key}': index for index, key in enumerate(states)}
+
+DEPENDENCY_DATA_TYPE = 0
+DEPENDENCY_LOGIC_TYPE = 1
