@@ -32,7 +32,6 @@ class PandasLoader(Loader):
     def load_content(self, content, format, append):
         content = content.json()        
         self.data = pd.DataFrame(content)
-        print(self.data)
         self.append = append
 
     def default_process(self):

@@ -19,7 +19,7 @@ class ArchiveLoader(Loader):
     files_folder = f'{settings.MOUNT_FOLDER}/files'
 
     def __init__(self, config):
-        logger.info('[ZIP Archive Loader] initialized')        
+        logger.info('[ZIP Archive Loader] initialized')
 
     def get_dataset(self):
         data = []
@@ -42,12 +42,7 @@ class ArchiveLoader(Loader):
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
-    def load_content(self, content, format, append):
-        return self.load(content, append)
-
-    def load_files(self, files, append=False):
-        logger.info('Loading files started')
-
+    def prepare_folders(self, append):
         temp_folder = f'{settings.MOUNT_FOLDER}/temp_files'
 
         timestamp = time.time()
@@ -75,6 +70,22 @@ class ArchiveLoader(Loader):
         except:
             pass
 
+        return (temp_folder, output_folder)
+
+    def load_content(self, content, format, append):
+        (_, output_folder) = self.prepare_folders(append)
+        if format == 'application/json':
+            data = content.json()
+            for item in data:
+                name = item['name']
+                data = base64.b64decode(item['base64encoded'])
+                file_location = f"{output_folder}/{name}"
+                with open(file_location, "wb+") as file_object:
+                    file_object.write(data)
+
+    def load_files(self, files, append=False):
+        logger.info('Loading files started')
+        (temp_folder, output_folder) = self.prepare_folders(append)
         for file in files:
             file_location = f"{temp_folder}/{file.filename}"
             with open(file_location, "wb+") as file_object:
@@ -109,7 +120,7 @@ class ArchiveLoader(Loader):
         else:
             resp = FileResponse(
                 data[page], filename=data[page].split("/")[-1])
-        
+
         return resp
 
     def looad_from_store(self):
@@ -122,10 +133,9 @@ class ArchiveLoader(Loader):
     def store(self):
         pass
 
-    
     def export_content_types(self):
         return [
-            'application/zip',
-            'application/binary',
-            'application/json'
+            'application/json',
+            # 'application/binary',
+            # 'application/zip'
         ]
