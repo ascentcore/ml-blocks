@@ -13,8 +13,11 @@ defaults = {
     'generate_statics': noop,
     'predict_schema': noop,
     'loader_config': {},
-    'use_loader': None    
+    'use_loader': None
 }
+
+
+statics_folder = f'{settings.MOUNT_FOLDER}/statics'
 
 class Runtime(Block):
 
@@ -28,9 +31,10 @@ class Runtime(Block):
             if hasattr(self, prop) == False:
                 setattr(self, prop, defaults[prop])
 
-        self.initialize(settings)
+        self.initialize(settings, statics_folder)
         self.has_static_generation = self.generate_statics != noop
         self._load_model()
+        
 
     def _load_model(self):
         if hasattr(self, 'load_model'):
