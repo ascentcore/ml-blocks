@@ -22,6 +22,11 @@ async def predict(request: Request, flow: Flow = Depends(get_flow)):
     predicts = flow.runtime.predict(data, request)
     return predicts
 
+@router.post("/predict_bg")
+async def predict(background_tasks: BackgroundTasks, request: Request, flow: Flow = Depends(get_flow)):
+    data = await flow.loader.load_request(request)
+    background_tasks.add_task(flow.runtime.predict, data, request)    
+
 @router.get("/predict_schema")
 async def get_interract_schema(flow: Flow = Depends(get_flow)):
     return flow.runtime.predict_schema()

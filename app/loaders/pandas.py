@@ -63,7 +63,7 @@ class PandasLoader(Loader):
 
     async def load_request(self, request):
         json_data = await request.json()
-        return pd.DataFrame(json_data)
+        return json_data
 
     def load_data(self, page=0, count=10, format=''):
         conn = self.get_connection()
