@@ -1,4 +1,5 @@
 import asyncio
+import os
 import logging
 import socket
 import requests
@@ -22,7 +23,8 @@ class Registry():
 
     def __init__(self):
         self.host = socket.gethostbyname(socket.gethostname())
-
+        logger.info(f'Current IP {self.host}')
+    
     def recreate_upstream_connections(self):
         current_dependencies = []
 
