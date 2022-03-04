@@ -46,6 +46,7 @@ async def startup():
 
     global initialized
     if not initialized:
+        cleanup(db)
         set_status(db, 'pending')
         logger.info('ML-Blocks startup complete...')
     
