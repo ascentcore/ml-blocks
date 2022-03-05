@@ -44,9 +44,30 @@ def graph(db=Depends(get_orm_db)):
     return db.query(models.Graph).all()
 
 
-@router.get("/dependencies")
-def register(db=Depends(get_orm_db)):
-    return db.query(models.Dependency).all()
+@router.delete("/graph")
+def graph(db=Depends(get_orm_db)):
+    graph = db.query(models.Graph).all()
+    db.query(models.Graph).delete()
+    db.commit()
+
+    ip_list = []
+    for row in graph:
+        ip_list.append(row.downstream)
+        ip_list.append(row.upstream)
+
+    ip_set = set(ip_list)
+
+    for item in ip_set:
+        try:
+            requests.post(f'http://{item}/api/v1/pipeline/recreate')
+        except:
+            logger.error(
+                f'Error while requesting to: {item}/api/v1/pipeline/recreate')
+
+
+@router.post("/recreate")
+def status(registry: Registry = Depends(get_registry)):
+    registry.recreate_upstream_connections(force=True)
 
 
 @router.get("/status")

@@ -25,7 +25,7 @@ class Registry():
         self.host = socket.gethostbyname(socket.gethostname())
         logger.info(f'Current IP {self.host}')
     
-    def recreate_upstream_connections(self):
+    def recreate_upstream_connections(self, force = False):
         current_dependencies = []
 
         def is_registered(host):
@@ -40,7 +40,7 @@ class Registry():
             for dep in dep_list:
                 try:
                     dependency_host = socket.gethostbyname(dep)
-                    if not is_registered(dependency_host):
+                    if not is_registered(dependency_host) or force:
                         logger.info(
                             f'{dependency_host} not registered in {self.dependencies}')
                         current_dependencies.append(
@@ -53,7 +53,7 @@ class Registry():
             try:
                 dependency_host = socket.gethostbyname(
                     settings.UPSTREAM_DATA_BLOCK)
-                if not is_registered(dependency_host):
+                if not is_registered(dependency_host) or force:
                     logger.info(
                         f'{dependency_host} not registered in {self.dependencies}')
                     current_dependencies.append(

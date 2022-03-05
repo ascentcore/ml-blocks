@@ -11,21 +11,24 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+
 @router.post("/train")
 async def train(background_tasks: BackgroundTasks, flow: Flow = Depends(get_flow), db=Depends(get_orm_db)):
     background_tasks.add_task(flow.retrain, db)
-    
+
 
 @router.post("/predict")
-async def predict(request: Request, flow: Flow = Depends(get_flow)):
-    data = await flow.loader.load_request(request)    
-    predicts = flow.runtime.predict(data, request)
+async def predict(request: Request, db=Depends(get_orm_db), flow: Flow = Depends(get_flow)):
+    data = await flow.loader.load_request(request)
+    predicts = flow.predict(db, data, request)
     return predicts
 
+
 @router.post("/predict_bg")
-async def predict(background_tasks: BackgroundTasks, request: Request, flow: Flow = Depends(get_flow)):
+async def predict(background_tasks: BackgroundTasks, request: Request, db=Depends(get_orm_db), flow: Flow = Depends(get_flow)):
     data = await flow.loader.load_request(request)
-    background_tasks.add_task(flow.runtime.predict, data, request)    
+    background_tasks.add_task(flow.predict, db, data, request)
+
 
 @router.get("/predict_schema")
 async def get_interract_schema(flow: Flow = Depends(get_flow)):

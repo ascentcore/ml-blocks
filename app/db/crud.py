@@ -13,7 +13,7 @@ def get_graph(db):
     return db.query(Graph).all()
 
 def get_status(db):
-    return db.query(Status).order_by(Status.id.desc()).all()
+    return db.query(Status).order_by(Status.id.desc()).first()
 
 
 def cleanup(db):    

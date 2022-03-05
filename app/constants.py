@@ -1,5 +1,5 @@
 states = ["booting", "empty", "ingesting",
-          "processing", "storing", "statics", "training", "pending"]
+          "processing", "storing", "statics", "training", "predicting", "pending"]
 
 
 stages = {f'{key}': index for index, key in enumerate(states)}

@@ -70,6 +70,13 @@ class Flow():
         else:
             self.loader.default_process()
 
+    def predict(self, db, data, request):
+        logger.info('Start predicting...')
+        set_status(db, 'predicting')                
+        result = self.runtime.predict(data, request)
+        set_status(db, 'pending')
+        return result
+
     def generate_statics(self, db):
         logger.info('Generating statics')
         set_status(db, 'statics')
