@@ -2,6 +2,12 @@ from sqlalchemy import Column, Integer, String, func, DateTime
 
 from app.db.base_class import Base
 
+
+class Block(Base): 
+    __tablename__ = 'block'
+    host = Column(String(256), nullable=False, primary_key=True)
+    name = Column(String(256), nullable=True)
+
 class Graph(Base): 
     __tablename__ = 'graph'
     id = Column(Integer)    

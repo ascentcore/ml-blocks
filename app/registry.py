@@ -1,81 +1,57 @@
 import asyncio
-import os
 import logging
 import socket
 import requests
 
-from app.db import models, crud
-from app.flow import Flow
+from app.db import models, crud, session
 from app.constants import DEPENDENCY_DATA_TYPE, DEPENDENCY_LOGIC_TYPE
-
-from .config import settings
-
 from app.utils.connection_utils import do_connect
+from app.flow import Flow
+from .config import settings
 
 logger = logging.getLogger(__name__)
 
 
 class Registry():
 
-    connected = False
-
-    dependencies = []
-
-    def __init__(self):
+    def __init__(self, flow):
         self.host = socket.gethostbyname(socket.gethostname())
-        logger.info(f'Current IP {self.host}')
-    
-    def recreate_upstream_connections(self, force = False):
-        current_dependencies = []
+        logger.info(f'Subscribing to registry')
+        if settings.REGISTRY:
+            self.connect(
+                f'http://{settings.REGISTRY}/api/v1/pipeline/register?name={flow.runtime.name}')
+        else:
+            db = session.SessionLocal()
+            # db.query(models.Block).delete()
+            self.register(db, self.host, 'Registry')
+            db.commit()
+            db.close()
 
-        def is_registered(host):
-            for item in self.dependencies:
-                if item[0] == host:
-                    return True
+    def register(self, db, host, name):
+        logger.info(f'Registering host: {host} with name: {name}')
+        block = models.Block(host=host, name=name)
+        db.merge(block)
+        db.commit()
 
-            return False
+    def get_graph(self, db, upstream=None, downstream=None, edge_type=None):
+        props = [['upstream', upstream], [
+            'downstream', downstream], ['edge_type', edge_type]]
 
-        if settings.DEPENDENCY_BLOCKS:
-            dep_list = settings.DEPENDENCY_BLOCKS.split(',')
-            for dep in dep_list:
-                try:
-                    dependency_host = socket.gethostbyname(dep)
-                    if not is_registered(dependency_host) or force:
-                        logger.info(
-                            f'{dependency_host} not registered in {self.dependencies}')
-                        current_dependencies.append(
-                            [dependency_host, DEPENDENCY_LOGIC_TYPE])
-                except:
-                    logger.error(f'Unable to find host {dep}')
-                    pass
+        query = db.query(models.Graph)
+        for prop in props:
+            if prop[1] != None:
+                query = query.filter(getattr(models.Graph, prop[0]) == prop[1])
+        return query.all()
 
-        if settings.UPSTREAM_DATA_BLOCK:
-            try:
-                dependency_host = socket.gethostbyname(
-                    settings.UPSTREAM_DATA_BLOCK)
-                if not is_registered(dependency_host) or force:
-                    logger.info(
-                        f'{dependency_host} not registered in {self.dependencies}')
-                    current_dependencies.append(
-                        [dependency_host, DEPENDENCY_DATA_TYPE])
+    def unregister(self, db, host):
+        logger.info(f'Unregistering host: {host}')
+        db.query(models.Block).filter_by(host=host).delete()
+        db.commit()
 
-            except:
-                logger.error(f'Unable to find host {dep}')
-                pass
-
-        for dep in current_dependencies:
-            self.dependencies.append(dep)
-            if dep[1] != DEPENDENCY_LOGIC_TYPE:
-                logger.info(
-                    f'Registering dependency  downstream={self.host}&upstream={dep[0]}&edge_type={dep[1]}')
-                self.connect(
-                    f'http://{dep[0]}/api/v1/pipeline/edge?downstream={self.host}&upstream={dep[0]}&edge_type={dep[1]}')
-
-            if settings.REGISTRY:
-                logger.info(
-                    f'Registering to registry downstream={self.host}&upstream={dep[0]}&edge_type={dep[1]}')
-                self.connect(
-                    f'http://{settings.REGISTRY}/api/v1/pipeline/edge?downstream={self.host}&upstream={dep[0]}&edge_type={dep[1]}')
+    def unsubscribe(self):
+        if settings.REGISTRY:
+            requests.delete(
+                f'http://{settings.REGISTRY}/api/v1/pipeline/register')
 
     def connect(self, url):
         logger.info('Trying to connect to dependency')
@@ -110,52 +86,66 @@ class Registry():
         db.commit()
 
     def notify_downstream(self, db):
-        dependencies = db.query(models.Graph).all()
-        for dep in dependencies:
-            if dep.edge_type == DEPENDENCY_DATA_TYPE:
-                logger.info(
-                    f'Notifying downstream dependency: {dep.downstream}')
-                requests.post(
-                    f'http://{dep.downstream}/api/v1/pipeline/rebuild')
+        if settings.REGISTRY:
+            content = requests.get(
+                f'http://{settings.REGISTRY}/api/v1/pipeline/graph?upstream={self.host}&edge_type=0')
+            dependencies = content.json()
+            downstream_deps = [dep['downstream'] for dep in dependencies]
+        else:
+            dependencies = self.get_graph(
+                db, upstream=self.host, edge_type=DEPENDENCY_DATA_TYPE)
+            downstream_deps = [dep.downstream for dep in dependencies]
+
+        for dep in downstream_deps:
+            logger.info(
+                f'Notifying downstream dependency: {dep}')
+            requests.post(
+                f'http://{dep}/api/v1/pipeline/rebuild')
 
     def rebuild_from_upstream(self, flow: Flow, db):
-        upstream_dep = None
-        for dep in self.dependencies:
-            if dep[1] == 0:
-                upstream_dep = f'http://{dep[0]}'
+        if settings.REGISTRY:
+            content = requests.get(
+                f'http://{settings.REGISTRY}/api/v1/pipeline/graph?downstream={self.host}&edge_type=0')
+            dependencies = content.json()
+            upstream_deps = [dep['upstream'] for dep in dependencies]
+        else:
+            dependencies= self.get_graph(
+                db, downstream=self.host, edge_type=DEPENDENCY_DATA_TYPE)
+            upstream_deps= [dep.upstream for dep in dependencies]
 
-        if upstream_dep:
-            upstream_content_types_req = requests.get(
-                f'{upstream_dep}/api/v1/pipeline/content_types')
 
-            upstream_content_types = upstream_content_types_req.json()
-            loader_content_types = flow.loader.export_content_types()
+        for dep in upstream_deps:
+            upstream_content_types_req= requests.get(
+                f'http://{dep}/api/v1/pipeline/content_types')
 
-            common_types = list(
+            upstream_content_types= upstream_content_types_req.json()
+            loader_content_types= flow.loader.export_content_types()
+
+            common_types= list(
                 set(upstream_content_types).intersection(loader_content_types))
 
             if len(common_types) > 0:
                 # raise RuntimeError(
                 #     "Upstream dependency is not exporting data in a format common to the current block")
 
-                selected_type = common_types[0]
+                selected_type= common_types[0]
 
-                count_req = requests.get(f'{upstream_dep}/api/v1/data/count')
+                count_req= requests.get(f'http://{dep}/api/v1/data/count')
 
-                count = int(count_req.text)
+                count= int(count_req.text)
                 logger.info(
                     f'Upstream dependency has {count} items to process')
 
-                page_size = 100000
+                page_size= 100000
 
-                reps = int(count / page_size) + 1
+                reps= int(count / page_size) + 1
 
                 logger.info(f'Number of iterations to process {reps}')
                 crud.set_status(db, 'ingesting')
 
                 for i in range(0, reps):
-                    content = requests.get(
-                        f'{upstream_dep}/api/v1/data?page={i}&count={page_size}&format={selected_type}')
+                    content= requests.get(
+                        f'http://{dep}/api/v1/data?page={i}&count={page_size}&format={selected_type}')
                     flow.loader.load_content(content, selected_type, i != 0)
                     flow.process_loaded_data(db, None, False)
 

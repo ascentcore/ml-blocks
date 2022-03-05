@@ -23,5 +23,5 @@ def get_flow() -> Flow:
 def get_registry() -> Registry:
     global registry
     if registry == None:
-        registry = Registry()
+        registry = Registry(flow)
     return registry

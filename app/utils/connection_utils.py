@@ -4,18 +4,20 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-async def try_connect(url):
-    result = requests.put(url)
+
+async def try_connect(url, method):
+    method_to_call = getattr(requests, method)
+    result = method_to_call(url)
     return result.status_code == 200
 
 
-async def do_connect(url: str, max_trials=5, sleep_interval=5):
+async def do_connect(url: str, method='put', max_trials=5, sleep_interval=5):
     trials = 1
     connected = False
     while trials < max_trials and connected == False:
         logger.info(f'Attempting to connect to {url}. Attempt {trials}')
         try:
-            res = await try_connect(url)
+            res = await try_connect(url, method)
             if res:
                 connected = True
                 break
@@ -31,7 +33,12 @@ async def do_connect(url: str, max_trials=5, sleep_interval=5):
     return connected
 
 
-async def trial_execute(fn, max_trials = 5, sleep_interval = 5):
+'''
+Not used so far
+'''
+
+
+async def trial_execute(fn, max_trials=5, sleep_interval=5):
     trials = 1
     succeeded = False
     while trials < max_trials and succeeded == False:
