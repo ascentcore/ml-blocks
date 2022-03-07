@@ -1,5 +1,5 @@
 import pickle
-
+import socket
 from app.custom.block import Block
 from .config import settings
 
@@ -34,6 +34,7 @@ class Runtime(Block):
         self.initialize(settings, statics_folder)
         self.has_static_generation = self.generate_statics != noop
         self._load_model()
+        self.host = socket.gethostbyname(socket.gethostname())
         
 
     def _load_model(self):
