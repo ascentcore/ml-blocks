@@ -37,15 +37,15 @@ class Flow():
         self.generate_statics(db)
         self.set_pending(db)
 
-    def train(self, db):
+    def train(self, db, request):
         set_status(db, 'training')
-        model = self.runtime.train(self.loader)
+        model = self.runtime.train(self.loader, request)
         self.runtime.store_model(model)
-
-    def retrain(self, db):
-        self.train(db)
-        self.generate_statics(db)
         self.set_pending(db)
+
+    def retrain(self, db, request):
+        self.train(db, request)
+        self.generate_statics(db)
 
     def process_loaded_data(self, db, extras, update_status = True):
         self.process_data(extras)
@@ -86,6 +86,7 @@ class Flow():
             self.runtime.generate_statics(data, statics_folder)
         else:
             logger.info('Block implementation has no statics generation code')
+        set_status(db, 'pending')
 
     def list_statics(self):
         return os.listdir(statics_folder)

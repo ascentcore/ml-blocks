@@ -1,5 +1,4 @@
-from email.policy import default
-from sqlalchemy import and_
+from sqlalchemy import or_
 import logging
 import requests
 
@@ -96,27 +95,36 @@ def graph(upstream: str = None,
 
 
 @router.delete("/graph")
-def graph(db=Depends(get_orm_db)):
-    graph = db.query(models.Graph).all()
-    db.query(models.Graph).delete()
+def graph(
+    db=Depends(get_orm_db)
+):
+    registered_blocks = db.query(models.Block).all()
+
+    to_remove = []
+    for block in registered_blocks:
+        try:
+            request = requests.get(
+                f'http://{block.host}/api/v1/status')
+            print(request.status_code, block.host)
+            if request.status_code != 200:
+                to_remove.append(block.host)
+        except:
+            to_remove.append(block.host)
+            pass
+
+    db.query(models.Block).filter(models.Block.host.in_(to_remove)).delete()
+    db.query(models.Graph).filter(
+        or_(
+            models.Graph.downstream.in_(to_remove),
+            models.Graph.upstream.in_(to_remove))
+    ).delete()
+
     db.commit()
 
-    ip_list = []
-    for row in graph:
-        ip_list.append(row.downstream)
-        ip_list.append(row.upstream)
-
-    ip_set = set(ip_list)
-
-    for item in ip_set:
-        try:
-            requests.post(f'http://{item}/api/v1/pipeline/recreate')
-        except:
-            logger.error(
-                f'Error while requesting to: {item}/api/v1/pipeline/recreate')
+    return to_remove
 
 
-@router.get("/status")
+@ router.get("/status")
 def status(registry: Registry = Depends(get_registry)):
     return {
         "connected": registry.connected,
@@ -124,17 +132,17 @@ def status(registry: Registry = Depends(get_registry)):
     }
 
 
-@router.get("/loader")
+@ router.get("/loader")
 def get_loader(flow: Flow = Depends(get_flow)):
     return type(flow.loader).__name__
 
 
-@router.get("/content_types")
+@ router.get("/content_types")
 def get_loader(flow: Flow = Depends(get_flow)):
     return flow.loader.export_content_types()
 
 
-@router.post("/rebuild")
+@ router.post("/rebuild")
 def rebuild(
         background_tasks: BackgroundTasks,
         flow: Flow = Depends(get_flow),

@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 class Registry():
 
     def __init__(self, flow):
+        self.try_register(flow)
+
+    def try_register(self, flow):
         self.host = socket.gethostbyname(socket.gethostname())
         logger.info(f'Subscribing to registry')
         if settings.REGISTRY:

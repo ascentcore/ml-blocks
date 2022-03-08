@@ -13,8 +13,12 @@ router = APIRouter()
 
 
 @router.post("/train")
-async def train(background_tasks: BackgroundTasks, flow: Flow = Depends(get_flow), db=Depends(get_orm_db)):
-    background_tasks.add_task(flow.retrain, db)
+async def train(
+        background_tasks: BackgroundTasks,
+        request: Request,
+        flow: Flow = Depends(get_flow),
+        db=Depends(get_orm_db)):
+    background_tasks.add_task(flow.retrain, db, request)
 
 
 @router.post("/predict")
