@@ -33,7 +33,7 @@ class Flow():
         self.add_data(content, append)
         set_status(db, 'processing')
         self.process_loaded_data(db, extras)        
-        self.train(db)
+        self.train(db, None)
         self.generate_statics(db)
         self.set_pending(db)
 
