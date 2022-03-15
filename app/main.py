@@ -38,4 +38,4 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     logger.info('Shutting down... unregistering')
-    get_registry().unsubscribe()
+    # get_registry().unsubscribe()

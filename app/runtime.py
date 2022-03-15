@@ -1,4 +1,5 @@
 import pickle
+import json
 import socket
 from app.custom.block import Block
 from .config import settings
@@ -11,6 +12,7 @@ defaults = {
     'train': noop,
     'predict': noop,
     'generate_statics': noop,
+    'settings_schema': noop,
     'predict_schema': noop,
     'loader_config': {},
     'use_loader': None
@@ -34,7 +36,11 @@ class Runtime(Block):
         self.initialize(settings, statics_folder)
         self.has_static_generation = self.generate_statics != noop
         self._load_model()
-        self.host = socket.gethostbyname(socket.gethostname())
+        self.host = socket.gethostbyname(socket.gethostname())    
+
+
+    def get_settings(self):
+        return json.load(open(f'{settings.MOUNT_FOLDER}/settings.json'))
         
 
     def _load_model(self):

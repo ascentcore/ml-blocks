@@ -37,7 +37,7 @@ class Flow():
         self.generate_statics(db)
         self.set_pending(db)
 
-    def train(self, db, request):
+    def train(self, db, request = None):
         set_status(db, 'training')
         model = self.runtime.train(self.loader, request)
         self.runtime.store_model(model)
