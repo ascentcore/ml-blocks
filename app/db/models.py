@@ -29,3 +29,11 @@ class Status(Base):
     state = Column(Integer, nullable=False)
     state_name = Column(String(256), nullable=False)
     time = Column(DateTime(timezone=True), default=func.now())
+
+
+class Report(Base):
+    __tablename__ = 'report'
+    
+    host = Column(String(256), nullable=False, primary_key=True)
+    type = Column(String(256), nullable=False, primary_key=True)
+    value = Column(String(256), nullable=False)

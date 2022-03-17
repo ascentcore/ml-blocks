@@ -105,7 +105,6 @@ def graph(
         try:
             request = requests.get(
                 f'http://{block.host}/api/v1/status')
-            print(request.status_code, block.host)
             if request.status_code != 200:
                 to_remove.append(block.host)
         except:
@@ -124,7 +123,7 @@ def graph(
     return to_remove
 
 
-@ router.get("/status")
+@router.get("/status")
 def status(registry: Registry = Depends(get_registry)):
     return {
         "connected": registry.connected,
@@ -132,17 +131,17 @@ def status(registry: Registry = Depends(get_registry)):
     }
 
 
-@ router.get("/loader")
+@router.get("/loader")
 def get_loader(flow: Flow = Depends(get_flow)):
     return type(flow.loader).__name__
 
 
-@ router.get("/content_types")
+@router.get("/content_types")
 def get_loader(flow: Flow = Depends(get_flow)):
     return flow.loader.export_content_types()
 
 
-@ router.post("/rebuild")
+@router.post("/rebuild")
 def rebuild(
         background_tasks: BackgroundTasks,
         flow: Flow = Depends(get_flow),

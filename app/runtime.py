@@ -1,4 +1,6 @@
 import pickle
+import requests
+import os
 import json
 import socket
 from app.custom.block import Block
@@ -10,6 +12,7 @@ def noop(*argv):
 
 
 defaults = {
+    'name': os.getenv("BLOCK_NAME", "Pass Through ML Block"),
     'initialize': noop,
     'train': noop,
     'predict': noop,
@@ -40,6 +43,14 @@ class Runtime(Block):
         self.has_static_generation = self.generate_statics != noop
         self._load_model()
         self.host = socket.gethostbyname(socket.gethostname())
+
+    def report_progress(self, progress):
+        if settings.REGISTRY:
+            requests.post(
+                f'http://{settings.REGISTRY}/api/v1/status/report', json={
+                    "type": "progress",
+                    "value": progress
+                })
 
     def get_settings(self):
         try:

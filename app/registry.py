@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import socket
+import sqlite3
 import requests
 
 from app.db import models, crud, session
@@ -23,18 +24,50 @@ class Registry():
         if settings.REGISTRY:
             self.connect(
                 f'http://{settings.REGISTRY}/api/v1/pipeline/register?name={flow.runtime.name}')
+
+            if settings.DATA_DEPENDENCY:
+                try:
+                    upstream = socket.gethostbyname(settings.DATA_DEPENDENCY)
+                    if upstream:
+                        self.connect(
+                            f'http://{settings.REGISTRY}/api/v1/pipeline/edge?upstream={upstream}&downstream={self.host}&edge_type=0')
+                except:
+                    logger.error(
+                        f'Unable to request registration of {settings.DATA_DEPENDENCY} as data dependency')
+                    pass
+
+            if settings.LOGIC_DEPENDENCIES:
+                deps = settings.LOGIC_DEPENDENCIES.split(',')
+                for dep in deps:
+                    try:
+                        logger.info(
+                            f'Trying to register as logic dependncy of {dep}')
+                        upstream = socket.gethostbyname(dep)
+                        if upstream:
+                            self.connect(
+                                f'http://{settings.REGISTRY}/api/v1/pipeline/edge?upstream={upstream}&downstream={self.host}&edge_type=1')
+                    except:
+                        logger.error(
+                            f'Unable to request registration of {settings.DATA_DEPENDENCY} as logic dependency')
+                        pass
         else:
-            db = session.SessionLocal()
-            # db.query(models.Block).delete()
-            self.register(db, self.host, 'Registry')
-            db.commit()
-            db.close()
+            try:
+                db = session.SessionLocal()
+                self.register(db, self.host, 'Registry')
+                db.commit()
+                db.close()
+            except:
+                logger.error(
+                    'To be fixed: multiple registrations were executed at once')
 
     def register(self, db, host, name):
         logger.info(f'Registering host: {host} with name: {name}')
-        block = models.Block(host=host, name=name)
-        db.merge(block)
-        db.commit()
+        try:
+            block = models.Block(host=host, name=name)
+            db.merge(block)
+            db.commit()
+        except sqlite3.IntegrityError:
+            pass
 
     def get_graph(self, db, upstream=None, downstream=None, edge_type=None):
         props = [['upstream', upstream], [
@@ -85,8 +118,12 @@ class Registry():
 
         edge = models.Graph(upstream=upstream,
                             downstream=downstream, edge_type=edge_type)
-        db.merge(edge)
-        db.commit()
+
+        try:
+            db.merge(edge)
+            db.commit()
+        except sqlite3.IntegrityError:
+            pass
 
     def notify_downstream(self, db):
         if settings.REGISTRY:
@@ -106,51 +143,51 @@ class Registry():
                 f'http://{dep}/api/v1/pipeline/rebuild')
 
     def rebuild_from_upstream(self, flow: Flow, db):
+        upstream_deps = []
+
         if settings.REGISTRY:
             content = requests.get(
                 f'http://{settings.REGISTRY}/api/v1/pipeline/graph?downstream={self.host}&edge_type=0')
             dependencies = content.json()
             upstream_deps = [dep['upstream'] for dep in dependencies]
-        else:
-            dependencies= self.get_graph(
-                db, downstream=self.host, edge_type=DEPENDENCY_DATA_TYPE)
-            upstream_deps= [dep.upstream for dep in dependencies]
-
 
         for dep in upstream_deps:
-            upstream_content_types_req= requests.get(
+            upstream_content_types_req = requests.get(
                 f'http://{dep}/api/v1/pipeline/content_types')
 
-            upstream_content_types= upstream_content_types_req.json()
-            loader_content_types= flow.loader.export_content_types()
+            upstream_content_types = upstream_content_types_req.json()
+            loader_content_types = flow.loader.export_content_types()
 
-            common_types= list(
+            common_types = list(
                 set(upstream_content_types).intersection(loader_content_types))
 
             if len(common_types) > 0:
                 # raise RuntimeError(
                 #     "Upstream dependency is not exporting data in a format common to the current block")
 
-                selected_type= common_types[0]
+                selected_type = common_types[0]
 
-                count_req= requests.get(f'http://{dep}/api/v1/data/count')
+                count_req = requests.get(f'http://{dep}/api/v1/data/count')
 
-                count= int(count_req.text)
+                count = int(count_req.text)
                 logger.info(
                     f'Upstream dependency has {count} items to process')
 
-                page_size= 100000
+                page_size= 10000
 
-                reps= int(count / page_size) + 1
+                reps = int(count / page_size) + 1
 
                 logger.info(f'Number of iterations to process {reps}')
-                crud.set_status(db, 'ingesting')
+                # crud.set_status(db, 'ingesting')
+                flow.report_status(db, 'ingesting')
 
+                flow.runtime.report_progress(0)
                 for i in range(0, reps):
-                    content= requests.get(
+                    content = requests.get(
                         f'http://{dep}/api/v1/data?page={i}&count={page_size}&format={selected_type}')
                     flow.loader.load_content(content, selected_type, i != 0)
                     flow.process_loaded_data(db, None, False)
+                    flow.runtime.report_progress(i * 100 / (reps-1))
 
                 flow.train(db)
                 flow.generate_statics(db)

@@ -1,4 +1,4 @@
-from re import M
+import requests
 from app.db.crud import set_status
 from app.runtime import Runtime
 import logging
@@ -28,17 +28,26 @@ class Flow():
         except:
             pass
 
+    def report_status(self, db, value):
+        set_status(db, value)
+        if settings.REGISTRY:
+            requests.post(
+                f'http://{settings.REGISTRY}/api/v1/status/report', json={
+                    "type": "status",
+                    "value": value
+                })
+
     def start_data_ingest(self, db, content, append, extras):
-        set_status(db, 'ingesting')
+        self.report_status(db, 'ingesting')
         self.add_data(content, append)
-        set_status(db, 'processing')
-        self.process_loaded_data(db, extras)        
+        self.report_status(db, 'processing')
+        self.process_loaded_data(db, extras)
         self.train(db, None)
         self.generate_statics(db)
         self.set_pending(db)
 
-    def train(self, db, request = None):
-        set_status(db, 'training')
+    def train(self, db, request=None):
+        self.report_status(db, 'training')
         model = self.runtime.train(self.loader, request)
         self.runtime.store_model(model)
         self.set_pending(db)
@@ -47,14 +56,15 @@ class Flow():
         self.train(db, request)
         self.generate_statics(db)
 
-    def process_loaded_data(self, db, extras, update_status = True):
+    def process_loaded_data(self, db, extras, update_status=True):
         self.process_data(extras)
         if update_status:
-            set_status(db, 'storing')
+            self.report_status(db, 'storing')
         self.store_data()
 
     def set_pending(self, db):
-        set_status(db, 'pending')
+        self.runtime.report_progress(100)
+        self.report_status(db, 'pending')
 
     def add_data(self, content, append):
         logger.info('Started loading data')
@@ -72,21 +82,23 @@ class Flow():
 
     def predict(self, db, data, request):
         logger.info('Start predicting...')
-        set_status(db, 'predicting')                
+        self.report_status(db, 'predicting')
+        if self.runtime.model == None:
+            self.runtime._load_model()
         result = self.runtime.predict(data, request)
-        set_status(db, 'pending')
+        self.report_status(db, 'pending')
         return result
 
     def generate_statics(self, db):
         logger.info('Generating statics')
-        set_status(db, 'statics')
+        self.report_status(db, 'statics')
         global statics_folder
         if self.runtime.has_static_generation == True:
             data = self.loader.load_from_store()
             self.runtime.generate_statics(data, statics_folder)
         else:
             logger.info('Block implementation has no statics generation code')
-        set_status(db, 'pending')
+        self.report_status(db, 'pending')
 
     def list_statics(self):
         return os.listdir(statics_folder)

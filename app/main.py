@@ -1,4 +1,5 @@
 import logging
+import sqlite3 as sql
 
 from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
@@ -32,6 +33,14 @@ app.mount("/api/v1/download",
 
 @app.on_event('startup')
 async def startup():
+    conn = sql.connect('data/session.db')
+    cur = conn.cursor()
+    cur.execute("DELETE from graph")
+    cur.execute("DELETE from block")
+    cur.execute("DELETE from report")
+    conn.commit()
+    conn.close()
+
     get_registry()
 
 

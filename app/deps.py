@@ -8,7 +8,11 @@ flow = Flow()
 
 registry = None
 
-models.Base.metadata.create_all(bind=session.engine)
+try:
+    models.Base.metadata.create_all(bind=session.engine)
+except:
+    pass
+
 
 def get_orm_db() -> Generator:
     db = session.SessionLocal()
@@ -17,8 +21,10 @@ def get_orm_db() -> Generator:
     finally:
         db.close()
 
+
 def get_flow() -> Flow:
     return flow
+
 
 def get_registry() -> Registry:
     global registry
