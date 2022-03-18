@@ -187,7 +187,7 @@ class Registry():
                         f'http://{dep}/api/v1/data?page={i}&count={page_size}&format={selected_type}')
                     flow.loader.load_content(content, selected_type, i != 0)
                     flow.process_loaded_data(db, None, False)
-                    flow.runtime.report_progress(i * 100 / (reps-1))
+                    flow.runtime.report_progress(i * 100 / (reps))
 
                 flow.train(db)
                 flow.generate_statics(db)
