@@ -101,7 +101,14 @@ class Flow():
         self.report_status(db, 'pending')
 
     def list_statics(self):
-        return os.listdir(statics_folder)
+        # return os.listdir(statics_folder)
+        search_dir = statics_folder
+        os.chdir(search_dir)
+        files = filter(os.path.isfile, os.listdir(search_dir))
+        files = [(search_dir, f, os.path.getmtime(os.path.join(search_dir, f))) for f in files] # add path to each file
+        files.sort(key=lambda x: -x[2])
+        
+        return files
 
     def store_data(self):
         logger.info('Storing')
