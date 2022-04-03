@@ -46,6 +46,10 @@ class Flow():
         self.generate_statics(db)
         self.set_pending(db)
 
+    def start_data_append(self, db, content, extras):
+        self.report_status(db, 'ingesting')
+        self.loader.load_content(content, append = True)
+
     def train(self, db, request=None):
         self.report_status(db, 'training')
         model = self.runtime.train(self.loader, request)

@@ -40,6 +40,20 @@ def create_upload_file(
     return {"message": "Started data processing"}
 
 
+@router.post("/append")
+def append_data(
+    background_tasks: BackgroundTasks,
+    append: bool = Form(None),
+    extras: str = Form(None),
+    flow: Flow = Depends(get_flow),
+    registry: Registry = Depends(get_registry),
+    db=Depends(get_orm_db)):
+
+    background_tasks.add_task(
+        ingest_data_and_notify_downstream, flow, registry, files, append, extras, db)
+    return {"message": "Started data processing"}
+
+
 @router.get("/count")
 def get_dataset_length(flow: Flow = Depends(get_flow)):
     return flow.loader.count()

@@ -78,3 +78,9 @@ class Runtime(Block):
         else:
             pickle.dump(model, open(
                 f'{settings.MOUNT_FOLDER}/model.pkl', 'wb'))
+
+    def upload_file_to_server(self, service, file_name, append):
+        files = {"files": open(file_name, 'rb')}
+        r = requests.post(
+            f'http://{service}/api/v1/data/upload', files=files, data={'append': append})
+        print(r.text)
