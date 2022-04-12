@@ -1,0 +1,47 @@
+version: "3.3"
+services:
+
+  app_root_ds:
+    volumes:
+      - .:/app
+      - ./stores/root:/app/data
+      - ./samples/load-pipeline:/app/app/block
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - INSTALL_DEV=true
+    environment:
+      - LOADER=pandas
+    ports:
+      - "9080:80"
+    command: [ "/app/start_dev.sh" ]
+    # command: [ "/app/start.sh" ]
+    networks:
+      - ml-blocks-net
+
+  # app_ds_1:
+  #   volumes:
+  #     - .:/app
+  #     - ./stores/ds:/app/data
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - INSTALL_DEV=true
+  #   environment:
+  #     - LOADER=pandas
+  #     - REGISTRY=app_root_ds
+  #   ports:
+  #     - "9081:80"
+  #   command: [ "/app/start_dev.sh" ]
+  #   # command: [ "/app/start.sh" ]
+  #   networks:
+  #     - ml-blocks-net
+
+
+volumes:
+  store-data-volume: null
+
+networks:
+  ml-blocks-net:

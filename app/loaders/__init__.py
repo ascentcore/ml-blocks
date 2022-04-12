@@ -1,14 +1,15 @@
-from .archive import ArchiveLoader
-from .pandas import PandasLoader
-from .loader import Loader
+from app.loaders.pandas_loader import PandasLoader
+from .file_loader import FileLoader
 
-def get_loader(type: str) -> Loader:
-    
+
+def get_loader(type: str, settings):
+
     if type == None:
-        return PandasLoader
-    elif type.lower() == 'archive':
-        return ArchiveLoader
+        return FileLoader(settings=settings)
+    elif type.lower() == 'file_loader':
+        return FileLoader(settings=settings)
+    elif type.lower() == 'pandas_loader':
+        return PandasLoader(settings=settings)
     else:
-        return PandasLoader
-
-    
+        raise Exception(
+            f'Unkown pre-build loader {type}. Did you meant to pass a class?')

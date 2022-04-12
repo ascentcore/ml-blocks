@@ -1,120 +1,91 @@
-import requests
-from app.db.crud import set_status
-from app.runtime import Runtime
 import logging
-import os
-from app.config import settings
+import time
+from app.block.block import Block
+from app.decorators.singleton import singleton
+from app.settings import settings
+from app.runtime import Runtime
 from app.loaders import get_loader
-logging.basicConfig(level=logging.INFO)
+
 logger = logging.getLogger(__name__)
 
 
-statics_folder = f'{settings.MOUNT_FOLDER}/statics'
+@singleton
+class Flow:
 
+    loaders = []
 
-class Flow():
+    def __init__(self, touch):
+        logger.info('Flow initialized...')
+        self.block = Block()
+        self._touch_file = touch
 
-    def __init__(self):
-        self.runtime = Runtime()
-        self.runtime.statics_folder = statics_folder
-        loader_name = os.getenv("LOADER", self.runtime.use_loader)
-        loader_class = get_loader(loader_name)
-        self.loader = loader_class(self.runtime.loader_config)
+        self.runtime = self._prepare_runtime_object()
 
-        logger.info(f'Initialized block with {loader_class.__name__} instance')
+        self.call_method('on_initialize', self.runtime)
+        logger.info(
+            f'Block: "{self.block.name}" [Host: {settings.HOST}] runtime initialized.')
 
-        try:
-            os.mkdir(statics_folder)
-        except:
-            pass
+    def _prepare_runtime_object(self):
+        runtime = Runtime()
+        runtime.report_progress = self.report_progress
+        runtime.settings = settings
 
-    def report_status(self, db, value):
-        set_status(db, value)
-        if settings.REGISTRY:
-            requests.post(
-                f'http://{settings.REGISTRY}/api/v1/status/report', json={
-                    "type": "status",
-                    "value": value
-                })
+        if hasattr(self.block, 'loaders'):
+            prev_loader = None
+            loaders = []
+            for loader in self.block.loaders:
+                loader_implementation = None
+                if isinstance(loader, str):
+                    logger.info(f'Trying to initialize loader {loader}')
+                    try:
+                        loader_implementation = get_loader(loader, settings)
+                    except Exception as e:
+                        logger.error(f'Unable to initialize loader {loader}. Root Cause: {e}')
+                else:
+                    loader_implementation = loader
 
-    def start_data_ingest(self, db, content, append, extras):
-        self.report_status(db, 'ingesting')
-        self.add_data(content, append)
-        self.report_status(db, 'processing')
-        self.process_loaded_data(db, extras)
-        self.train(db, None)
-        self.generate_statics(db)
-        self.set_pending(db)
+                if loader_implementation != None:
+                    loader_implementation.initialize(settings, prev_loader)
+                    loaders.append(loader_implementation)
+                    prev_loader = loader_implementation
+                
+                self.loader = loader_implementation
+            self.loaders = loaders
 
-    def start_data_append(self, db, content, extras):
-        self.report_status(db, 'ingesting')
-        self.loader.load_content(content, append = True)
+        return runtime
 
-    def train(self, db, request=None):
-        self.report_status(db, 'training')
-        model = self.runtime.train(self.loader, request)
-        self.runtime.store_model(model)
-        self.set_pending(db)
+    def data_update(self):
+        logger.info('Data updated triggering loaders')
+        prev_loader = None
+        for loader in self.loaders:
+            loader.initialize(settings, prev_loader)
+            prev_loader = loader
 
-    def retrain(self, db, request):
-        self.train(db, request)
-        self.generate_statics(db)
+    def model_update(self):
+        logger.info('Model updated')
 
-    def process_loaded_data(self, db, extras, update_status=True):
-        self.process_data(extras)
-        if update_status:
-            self.report_status(db, 'storing')
-        self.store_data()
+    def load_data_files(self, files, append):
+        if not append:
+            for loader in self.loaders:
+                loader.clean()
 
-    def set_pending(self, db):
-        self.runtime.report_progress(100)
-        self.report_status(db, 'pending')
+        for file in files:
+            last_content = file
+            for loader in self.loaders:
+                last_content = loader.load_content(last_content)
+                logger.info(last_content)
 
-    def add_data(self, content, append):
-        logger.info('Started loading data')
-        self.loader.load_files(content, append)
-        logger.info('Data loading complete')
+        self._touch_file('data')
 
-    def process_data(self, extras=None):
-        logger.info('Processing dataset')
+    def call_method(self, method: str, *args, **kwargs):
+        if hasattr(self.block, method):
+            method_to_call = getattr(
+                self.block, method)
+            method_to_call(*args, **kwargs)
 
-        if hasattr(self.runtime, 'process_dataset'):
-            self.loader.data = self.runtime.process_dataset(
-                self.loader.data, extras)
-        else:
-            self.loader.default_process()
+    def report_progress(self, percent: int):
+        logger.info(f'Reporting progress... {percent}%')
+        return None
 
-    def predict(self, db, data, request):
-        logger.info('Start predicting...')
-        self.report_status(db, 'predicting')
-        if self.runtime.model == None:
-            self.runtime._load_model()
-        result = self.runtime.predict(data, request)
-        self.report_status(db, 'pending')
-        return result
-
-    def generate_statics(self, db):
-        logger.info('Generating statics')
-        self.report_status(db, 'statics')
-        global statics_folder
-        if self.runtime.has_static_generation == True:
-            data = self.loader.load_from_store()
-            self.runtime.generate_statics(data, statics_folder)
-        else:
-            logger.info('Block implementation has no statics generation code')
-        self.report_status(db, 'pending')
-
-    def list_statics(self):
-        # return os.listdir(statics_folder)
-        search_dir = statics_folder
-        os.chdir(search_dir)
-        files = filter(os.path.isfile, os.listdir(search_dir))
-        files = [(search_dir, f, os.path.getmtime(os.path.join(search_dir, f))) for f in files] # add path to each file
-        files.sort(key=lambda x: -x[2])
-        
-        return files
-
-    def store_data(self):
-        logger.info('Storing')
-        self.loader.store()
-        logger.info('Dataset processed')
+    def set_error_state(self, state):
+        pass
