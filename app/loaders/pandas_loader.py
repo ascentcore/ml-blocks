@@ -14,8 +14,6 @@ class PandasLoader:
         pass
 
     def _create_or_append_to_dataset(self, data_file):
-        logger.info('>>>>')
-        logger.info(data_file)
         current_dataset = None
 
         try:
@@ -26,24 +24,25 @@ class PandasLoader:
             logger.info(f'Unable to load file {data_file} ')
 
         if isinstance(current_dataset, pd.DataFrame):
-            if isinstance(self.dataset, pd.DataFrame):
+            current_dataset = self.process_fn(self, current_dataset) 
+            if isinstance(self.dataset, pd.DataFrame):                
                 self.dataset = self.dataset.append(current_dataset)
             else:
                 self.dataset = current_dataset
 
         return current_dataset
 
-    def initialize(self, settings, prev_loader):
+    def initialize(self, settings, prev_loader_dataset):
         logger.info('Initializing panads Loader')
-
-        if prev_loader:
-            dataset = prev_loader.dataset
-            for data_file in dataset:
+        if prev_loader_dataset:
+            for data_file in prev_loader_dataset:
                 self._create_or_append_to_dataset(data_file)
 
         else:
             raise Exception(
                 'pandas loader requires a file_loader to provide with data files')
+
+        return self.dataset
 
     def count(self):
         return len(self.dataset.index)
@@ -54,5 +53,5 @@ class PandasLoader:
     def load_content(self, file_location, *args):
         return self._create_or_append_to_dataset(file_location)
 
-    def query(self, startFrom=0, page=100):
-        return json.loads(self.dataset.to_json(orient='records'))
+    def query(self, page=0, count=100, format = ''):
+        return json.loads(self.dataset[page * count:page * count + count].to_json(orient='records'))

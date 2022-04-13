@@ -2,6 +2,7 @@ import logging
 import time
 import shutil
 import os
+from fastapi.responses import FileResponse
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +22,14 @@ class FileLoader:
         except FileExistsError:
             pass
 
-    def initialize(self, settings, prev_loader):
+    def initialize(self, *args):
         self.dataset = []
         for root, _, f_names in os.walk(self.storage_folder):
             for f in f_names:
                 self.dataset.append(os.path.join(root, f))
 
         logger.info(f'Dataset initialized with value {self.dataset}')
+        self.dataset = self.process_fn(self, self.dataset) 
         return self.dataset
 
     def count(self):
@@ -49,8 +51,23 @@ class FileLoader:
             file_object.write(file.file.read())
 
         logger.info(f'Appending to loader dataset: {file_location}')
-        self.dataset.append(file_location)
+        if self.process_fn([file_location]):
+            self.dataset.append(file_location)
         return file_location
 
-    def query(self, startFrom=0, page=100):
-        return self.dataset
+    def query(self, page=0, count=100, format='application/json'):
+        if format == None or format == 'application/json':
+            offset = page * count
+            file_list = self.dataset[offset:offset+count]
+            resp = []
+            for file_name in file_list:
+                f = open(file_name, "rb")
+                filename = file_name.split("/")[-1]
+                resp.append({
+                    "name": filename,
+                    "base64encoded": f.read()}
+                )
+
+            return resp
+        else:
+            raise Exception('FileLoader supports only "application/json"')

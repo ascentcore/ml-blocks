@@ -31,6 +31,7 @@ def count(
 @router.get("/")
 def get_dataset_length(
         page: int = 0,
-        count: int = 10,       
+        count: int = 10,
+        format: str = None,
         flow: Flow = Depends(get_flow)):
-    return flow.loader.query(page, count)
+    return flow.loader.query(page, count, format)
