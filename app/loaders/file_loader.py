@@ -56,7 +56,7 @@ class FileLoader:
         return file_location
 
     def query(self, page=0, count=100, format='application/json'):
-        if format == None or format == 'application/json':
+        if format is None or format == 'application/json':
             offset = page * count
             file_list = self.dataset[offset:offset+count]
             resp = []

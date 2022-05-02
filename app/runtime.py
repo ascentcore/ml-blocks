@@ -1,5 +1,7 @@
 from typing import Callable
+
 from app.settings import settings
+
 
 class Runtime:
 

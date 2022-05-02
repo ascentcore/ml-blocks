@@ -1,9 +1,12 @@
 import logging
 import socket
+
 from app.decorators.singleton import singleton
 from app.settings import settings
 from app.utils.connection import connect
+
 logger = logging.getLogger(__name__)
+
 
 @singleton
 class Registry:
