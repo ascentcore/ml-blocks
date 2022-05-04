@@ -26,10 +26,10 @@ app.add_middleware(
 )
 
 # Initialize folders
-initialize_folder('/data')
-initialize_folder('/data/listeners')
-initialize_folder('/data/statics')
-initialize_folder('/data/models')
+initialize_folder('')
+initialize_folder('listeners')
+initialize_folder('statics')
+initialize_folder('models')
 
 
 listeners = {'data': -1, 'model': -1}
@@ -37,7 +37,7 @@ listeners = {'data': -1, 'model': -1}
 
 def _touch_file(file):
     global listeners
-    fn = f'{settings.MOUNT_FOLDER}/data/listeners/{file}'
+    fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'
     logger.info(f'Touching file: {file}')
     with open(fn, 'w') as fp:
         fp.write('')
@@ -47,7 +47,7 @@ def _touch_file(file):
 
 
 for file in listeners.keys():
-    fn = f'{settings.MOUNT_FOLDER}/data/listeners/{file}'
+    fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'
     if not os.path.exists(fn):
         with open(fn, 'w') as fp:
             fp.write('')
@@ -61,7 +61,7 @@ def check_file_updates():
     global listeners
     for file in listeners.keys():
         timestamp = listeners[file]
-        fn = f'{settings.MOUNT_FOLDER}/data/listeners/{file}'
+        fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'
         file_timestamp = os.path.getmtime(fn)
 
         if file_timestamp != timestamp:

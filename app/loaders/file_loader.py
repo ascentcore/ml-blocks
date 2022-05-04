@@ -11,7 +11,7 @@ class FileLoader:
 
     def __init__(self, settings):
         self.mount_folder = settings.MOUNT_FOLDER
-        self.storage_folder = f'{settings.MOUNT_FOLDER}/data/file_loader_files'
+        self.storage_folder = f'{settings.MOUNT_FOLDER}/file_loader_files'
         self.create_folder()
 
     def create_folder(self):
@@ -51,7 +51,7 @@ class FileLoader:
             file_object.write(file.file.read())
 
         logger.info(f'Appending to loader dataset: {file_location}')
-        if self.process_fn([file_location]):
+        if self.process_fn(self, [file_location]):
             self.dataset.append(file_location)
         return file_location
 

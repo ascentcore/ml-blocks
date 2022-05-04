@@ -20,21 +20,23 @@ class PandasLoader:
             _, file_extension = os.path.splitext(data_file)
             if file_extension == '.csv':
                 current_dataset = pd.read_csv(data_file)
+            elif file_extension == '.json':
+                current_dataset = pd.read_json(data_file)
         except:
             logger.info(f'Unable to load file {data_file} ')
 
-        if isinstance(current_dataset, pd.DataFrame):
-            current_dataset = self.process_fn(self, current_dataset) 
-            if isinstance(self.dataset, pd.DataFrame):                
-                self.dataset = self.dataset.append(current_dataset)
-            else:
-                self.dataset = current_dataset
+        # if isinstance(current_dataset, pd.DataFrame):
+        #     current_dataset = self.process_fn(self, current_dataset) 
+        if isinstance(self.dataset, pd.DataFrame):                
+            self.dataset = self.dataset.append(current_dataset)
+        else:
+            self.dataset = current_dataset
 
         return current_dataset
 
     def initialize(self, settings, prev_loader_dataset):
         logger.info('Initializing pandas Loader')
-        if prev_loader_dataset:
+        if prev_loader_dataset is not None:
             for data_file in prev_loader_dataset:
                 self._create_or_append_to_dataset(data_file)
 
