@@ -1,10 +1,11 @@
 import logging
 import time
+
 from app.block.block import Block
 from app.decorators.singleton import singleton
+from app.loaders import get_loader
 from app.settings import settings
 from app.runtime import Runtime
-from app.loaders import get_loader
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ class Flow:
                 else:
                     loader_implementation = loader
 
-                if loader_implementation != None:
+                if loader_implementation is not None:
                     prev_loader_content = loader_implementation.initialize(
                         settings, prev_loader_content)
                     loaders.append(loader_implementation)

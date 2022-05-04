@@ -5,12 +5,11 @@ import asyncio
 
 from fastapi import FastAPI, Depends
 from fastapi_utils.tasks import repeat_every
-
 from starlette.middleware.cors import CORSMiddleware
 
+from app.api.v1 import api_router
 from app.flow import Flow
 from app.registry import Registry
-from app.api.v1 import api_router
 from app.settings import settings, initialize_folder
 
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)

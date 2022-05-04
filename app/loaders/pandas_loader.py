@@ -33,7 +33,7 @@ class PandasLoader:
         return current_dataset
 
     def initialize(self, settings, prev_loader_dataset):
-        logger.info('Initializing panads Loader')
+        logger.info('Initializing pandas Loader')
         if prev_loader_dataset:
             for data_file in prev_loader_dataset:
                 self._create_or_append_to_dataset(data_file)
