@@ -8,6 +8,7 @@ from fastapi_utils.tasks import repeat_every
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
+from app.deps import get_registry
 from app.flow import Flow
 from app.registry import Registry
 from app.settings import settings, initialize_folder
@@ -27,12 +28,22 @@ app.add_middleware(
 
 # Initialize folders
 initialize_folder('')
+initialize_folder('internal')
 initialize_folder('listeners')
 initialize_folder('statics')
 initialize_folder('models')
 
 
 listeners = {'data': -1, 'model': -1}
+
+for file in listeners.keys():
+    fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'
+    if not os.path.exists(fn):
+        with open(fn, 'w') as fp:
+            fp.write('')
+            fp.close()
+
+    listeners[file] = int(os.path.getmtime(fn))
 
 
 def _touch_file(file):
@@ -43,33 +54,28 @@ def _touch_file(file):
         fp.write('')
         fp.close()
 
-    listeners[file] = os.path.getmtime(fn)
-
-
-for file in listeners.keys():
-    fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'
-    if not os.path.exists(fn):
-        with open(fn, 'w') as fp:
-            fp.write('')
-            fp.close()
-
-    listeners[file] = os.path.getmtime(fn)
+    listeners[file] = int(os.path.getmtime(fn))
 
 
 def check_file_updates():
-    global flow
-    global listeners
+    # global flow
+    # global listeners
     for file in listeners.keys():
         timestamp = listeners[file]
         fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'
-        file_timestamp = os.path.getmtime(fn)
+        file_timestamp = int(os.path.getmtime(fn))
 
         if file_timestamp != timestamp:
             logger.info(
                 f'File {file} timestamp={file_timestamp} -> {timestamp}')
+            # try:
             method_to_call = getattr(flow, f'{file}_update')
             method_to_call()
-            listeners[file] = os.path.getmtime(fn)
+            listeners[file] = file_timestamp
+            logger.info(f'Updated to new timestamp {timestamp}')
+            # except:
+            #     logger.error('Unkown error')
+            #     pass
 
 
 flow = Flow(_touch_file)
@@ -84,5 +90,5 @@ def remove_expired_tokens_task() -> None:
 
 
 @app.on_event('shutdown')
-async def startup():
+async def shutdown():
     logger.info('Unregistering Block Thread')

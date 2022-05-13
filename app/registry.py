@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @singleton
 class Registry:
 
-    def __init__(self):
+    def __init__(self, db):
         if settings.REGISTRY:
             registry_host = socket.gethostbyname(settings.REGISTRY)
             logger.info(f'Block initialized with registry {settings.REGISTRY} [Host: {registry_host}]')

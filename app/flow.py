@@ -9,11 +9,15 @@ from app.runtime import Runtime
 
 logger = logging.getLogger(__name__)
 
+stages = ['load_data', 'generate_statics', 'train', 'pending']
+
 
 @singleton
 class Flow:
 
     loaders = []
+
+    stage = 'pending'
 
     def __init__(self, touch):
         logger.info('Flow initialized...')
@@ -25,6 +29,34 @@ class Flow:
         self.call_method('on_initialize', self.runtime)
         logger.info(
             f'Block: "{self.block.name}" [Host: {settings.HOST}] runtime initialized.')
+
+    def trigger(self, stage):
+        logger.info(f'Moving block to stage {stage} and triggering execution')
+        self.stage = stage
+        self.next(increment=False)
+
+    def next(self, increment=True):
+        current_stage_idx = stages.index(self.stage)
+
+        if increment:
+            self.stage = stages[current_stage_idx+1]
+        
+        if self.stage is not 'pending':
+            try:
+                for local_stage in [f'on_before_{self.stage}', self.stage, f'on_after_{self.stage}']:
+                    self.write_stage(local_stage)
+                    self.call_method(local_stage, self.runtime)
+                self.next()
+            except Exception as e:
+                # logger.error(e)
+                logger.exception(e)
+                self.report_error(local_stage)
+      
+
+    def write_stage(self, stage):
+        with open(f'{settings.MOUNT_FOLDER}/internal/stage', 'w') as fp:
+            fp.write(stage)
+            fp.close()
 
     def _pass_through_process_fn(self, loader, dataset):
         return dataset
@@ -58,6 +90,7 @@ class Flow:
 
                 self.loader = loader_implementation
             self.loaders = loaders
+            runtime.loader = loader_implementation
 
         return runtime
 
@@ -66,19 +99,34 @@ class Flow:
             for loader in self.loaders:
                 loader.clean()
 
-        for file in files:
-            last_content = file
-            for loader in self.loaders:
-                last_content = loader.load_content(last_content)
-                logger.info(last_content)
+        self.call_method('on_before_load_data', self.runtime)
 
+        try:
+            for file in files:
+                last_content = file
+                for loader in self.loaders:
+                    last_content = loader.load_content(last_content)
+        except:
+            self.report_error('load_data')
+
+        self.call_method('on_after_load_data', self.runtime)
         self._touch_file('data')
+        self.stage = 'generate_statics'
+        self.next()
 
     def call_method(self, method: str, *args, **kwargs):
+        logger.info(f'Trying to call {method}')
         if hasattr(self.block, method):
             method_to_call = getattr(
                 self.block, method)
             return method_to_call(*args, **kwargs)
+
+        return True
+
+    def report_error(self, method):
+        self.stage = f'{method}_error'
+        self.write_stage(f'{method}_error')
+        self.call_method('on_error', method, self.runtime)
 
     def report_progress(self, percent: int):
         logger.info(f'Reporting progress... {percent}%')
@@ -95,10 +143,9 @@ class Flow:
 
     def data_update(self):
         logger.info('Data updated triggering loaders')
-        prev_loader = None
+        prev_loader_content = None
         for loader in self.loaders:
-            loader.initialize(settings, prev_loader)
-            prev_loader = loader
+            prev_loader_content = loader.initialize(settings, prev_loader_content)
 
     def model_update(self):
         logger.info('Model updated')

@@ -4,8 +4,10 @@ services:
   app_root_ds:
     volumes:
       - .:/app
-      - ./stores/root:/app/data
-      - ./samples/load-pipeline:/app/app/block
+      - ./stores/rf:/app/data
+      - ./samples/scheduled:/app/app/block
+      # - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
+      # - ./samples/echo:/app/app/block
     build:
       context: .
       dockerfile: Dockerfile

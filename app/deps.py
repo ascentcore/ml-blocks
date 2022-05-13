@@ -16,6 +16,5 @@ def get_orm_db() -> Generator:
     finally:
         db.close()
 
-
 def get_registry() -> Registry:
     return Registry()
