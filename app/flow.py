@@ -40,7 +40,7 @@ class Flow:
 
         if increment:
             self.stage = stages[current_stage_idx+1]
-        
+
         if self.stage is not 'pending':
             try:
                 for local_stage in [f'on_before_{self.stage}', self.stage, f'on_after_{self.stage}']:
@@ -51,7 +51,6 @@ class Flow:
                 # logger.error(e)
                 logger.exception(e)
                 self.report_error(local_stage)
-      
 
     def write_stage(self, stage):
         with open(f'{settings.MOUNT_FOLDER}/internal/stage', 'w') as fp:
@@ -89,8 +88,14 @@ class Flow:
                     loaders.append(loader_implementation)
 
                 self.loader = loader_implementation
+
             self.loaders = loaders
             runtime.loader = loader_implementation
+
+        def load_data_content(file, append):
+            self.load_data_files([file], append)
+
+        runtime.load_data_content = load_data_content
 
         return runtime
 
@@ -106,13 +111,14 @@ class Flow:
                 last_content = file
                 for loader in self.loaders:
                     last_content = loader.load_content(last_content)
-        except:
+        except Exception as e:
+            logger.exception(e)
             self.report_error('load_data')
 
         self.call_method('on_after_load_data', self.runtime)
         self._touch_file('data')
         self.stage = 'generate_statics'
-        self.next()
+        self.next(False)
 
     def call_method(self, method: str, *args, **kwargs):
         logger.info(f'Trying to call {method}')
@@ -145,7 +151,8 @@ class Flow:
         logger.info('Data updated triggering loaders')
         prev_loader_content = None
         for loader in self.loaders:
-            prev_loader_content = loader.initialize(settings, prev_loader_content)
+            prev_loader_content = loader.initialize(
+                settings, prev_loader_content)
 
     def model_update(self):
         logger.info('Model updated')

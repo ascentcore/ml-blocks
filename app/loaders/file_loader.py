@@ -2,6 +2,7 @@ import logging
 import time
 import shutil
 import os
+from typing import Dict
 from fastapi.responses import FileResponse
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ class FileLoader:
                 self.dataset.append(os.path.join(root, f))
 
         logger.info(f'Dataset initialized with value {self.dataset}')
-        self.dataset = self.process_fn(self, self.dataset) 
+        self.dataset = self.process_fn(self, self.dataset)
         return self.dataset
 
     def count(self):
@@ -44,25 +45,33 @@ class FileLoader:
         self.dataset = []
 
     def load_content(self, file, *args):
-        file_name, file_extension = os.path.splitext(file.filename)
+        write_type = 'wb+'
+        if isinstance(file, dict):
+            write_type = 'w'
+            file_name, file_extension = os.path.splitext(file['filename'])
+            content = file['content']
+        else:
+            file_name, file_extension = os.path.splitext(file.filename)
+            content = file.file.read()
+
         file_location = f"{self.storage_folder}/{file_name}-{int(time.time())}{file_extension}"
 
-        with open(file_location, "wb+") as file_object:
-            file_object.write(file.file.read())
+        with open(file_location, write_type) as file_object:
+            file_object.write(content)
 
         logger.info(f'Appending to loader dataset: {file_location}')
         if self.process_fn(self, [file_location]):
             self.dataset.append(file_location)
         return file_location
 
-    def query(self, page=0, count=100, format='application/json'):
+    def query(self, page = 0, count = 100, format = 'application/json'):
         if format is None or format == 'application/json':
-            offset = page * count
-            file_list = self.dataset[offset:offset+count]
-            resp = []
+            offset=page * count
+            file_list=self.dataset[offset:offset+count]
+            resp=[]
             for file_name in file_list:
-                f = open(file_name, "rb")
-                filename = file_name.split("/")[-1]
+                f=open(file_name, "rb")
+                filename=file_name.split("/")[-1]
                 resp.append({
                     "name": filename,
                     "base64encoded": f.read()}

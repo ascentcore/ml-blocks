@@ -24,7 +24,7 @@ class PandasLoader:
         except:
             logger.info(f'Unable to load file {data_file} ')
 
-        current_dataset = self.process_fn(self, current_dataset) 
+        # current_dataset = self.process_fn(self, current_dataset) 
             
         if isinstance(self.dataset, pd.DataFrame):                
             self.dataset = self.dataset.append(current_dataset)
