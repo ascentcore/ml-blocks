@@ -5,8 +5,9 @@ services:
     volumes:
       - .:/app
       - ./stores/rf:/app/data
-      - ./samples/scheduled:/app/app/block
-      # - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
+      # - ./samples/scheduled:/app/app/block
+      - ./samples/random-forest:/app/app/block      
+      - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
       # - ./samples/echo:/app/app/block
     build:
       context: .

@@ -5,9 +5,9 @@ import threading
 
 
 def printit():
-    header = ['col1', 'col2', 'col3']
+    header = ['x', 'y', 'c']
     with open('tmp.csv', 'w') as file:
-        file.write('time,col1,col2,col3\n')
+        file.write('time,x,y,c\n')
         for i in range(0, 300):
             file.write(
                 f'{time.ctime(time.time())},{random.random()},{random.random()},{random.random()}\n')

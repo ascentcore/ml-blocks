@@ -34,7 +34,7 @@ initialize_folder('statics')
 initialize_folder('models')
 
 
-listeners = {'data': -1, 'model': -1}
+listeners = {'data': -1, 'model': -1, 'preferences': -1}
 
 for file in listeners.keys():
     fn = f'{settings.MOUNT_FOLDER}/listeners/{file}'

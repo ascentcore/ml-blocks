@@ -59,3 +59,8 @@ class Runtime:
                     pass
 
                 await asyncio.sleep(interval)
+
+    def predict(self, data):
+        logger.info('Attempting to predict')
+        result = self.model.predict(data)
+        return result

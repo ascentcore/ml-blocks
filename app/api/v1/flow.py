@@ -1,6 +1,7 @@
+import json
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import Request, APIRouter, Depends
 from app.settings import settings
 from app.deps import get_flow
 from app.flow import Flow
@@ -22,3 +23,12 @@ def get_dataset_length(
 def get_dataset_length():
     with open(f'{settings.MOUNT_FOLDER}/internal/stage', 'r') as infile:
         return infile.read()
+
+
+@router.post("/preferences")
+async def update_preferences(request: Request, flow: Flow = Depends(get_flow)):
+    json_data = await request.json()
+    if json_data != None:
+        with open(f'{settings.MOUNT_FOLDER}/internal/preferences.json', 'w') as outfile:
+            outfile.write(json.dumps(json_data))
+            flow._touch_file('preferences')
