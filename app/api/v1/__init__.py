@@ -4,6 +4,7 @@ from . import data
 from . import flow
 from . import model
 from . import statics
+from . import registry
 
 api_router = APIRouter()
 
@@ -12,3 +13,4 @@ api_router.include_router(data.router, prefix="/data", tags=["data"])
 api_router.include_router(flow.router, prefix="/flow", tags=["flow"])
 api_router.include_router(model.router, prefix="/model", tags=["model"])
 api_router.include_router(statics.router, prefix="/statics", tags=["statics"])
+api_router.include_router(registry.router, prefix="/registry", tags=["registry"])

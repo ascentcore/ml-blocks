@@ -14,7 +14,6 @@ class Block:
 
     def on_initialize(self, runtime):
         logger.info('Initializing scheduled events...')
-        logger.info(runtime.loader.dataset.dtypes)
         runtime.schedule_fn_call(self.fetch_data(runtime), 10)
 
     def fetch_data(self, runtime):

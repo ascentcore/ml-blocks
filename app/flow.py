@@ -1,5 +1,6 @@
 import logging
 import pickle
+import time
 import json
 
 from app.block.block import Block
@@ -7,10 +8,12 @@ from app.decorators.singleton import singleton
 from app.loaders import get_loader
 from app.settings import settings
 from app.runtime import Runtime
+from app.registry import Registry
 
 logger = logging.getLogger(__name__)
 
 default_stages = ['load_data', 'train', 'generate_statics']
+
 
 @singleton
 class Flow:
@@ -22,6 +25,7 @@ class Flow:
     def __init__(self, touch):
         logger.info('Flow initialized...')
         self.block = Block()
+        self.registry = Registry(self.block.name, self.on_connect)
         self._touch_file = touch
 
         logger.info(f'Initializing block {self.block.name}')
@@ -34,6 +38,16 @@ class Flow:
         self.call_method('on_initialize', self.runtime)
         logger.info(
             f'Block: "{self.block.name}" [Host: {settings.HOST}] runtime initialized.')
+
+    def initialize(self):
+        self.registry.initialize()
+    
+    def on_connect(self):
+        logger.info('<<<<< Connected')
+        self.registry.send_data({'stage': self.stage})
+
+    def unsubscribe(self):
+        self.registry.unsubscribe()
 
     def trigger(self, stage):
         logger.info(f'Moving block to stage {stage} and triggering execution')
@@ -162,7 +176,6 @@ class Flow:
             method_to_call = getattr(
                 self.block, method)
             return method_to_call(*args, **kwargs)
-       
 
     def report_error(self, method):
         self.stage = f'{method}_error'

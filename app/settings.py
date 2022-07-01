@@ -1,6 +1,7 @@
 import socket
 import os
 import logging
+import shutil
 
 from pydantic import BaseSettings
 
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
     LOGIC_DEPENDENCIES: str = os.getenv("LOGIC_DEPENDENCIES", None)
     REGISTRY: str = os.getenv("REGISTRY", None)
     HOST: str = socket.gethostbyname(socket.gethostname())
+    HOSTNAME: str = os.getenv("HOSTNAME", HOST)
 
     class Config:
         case_sensitive = True
@@ -28,8 +30,12 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def initialize_folder(name: str):
+def initialize_folder(name: str, remove = False):
     mount_folder = f'{settings.MOUNT_FOLDER}/{name}'
+
+    if remove:
+        shutil.rmtree(mount_folder, ignore_errors=True)
+
     try:
         os.mkdir(mount_folder)
         logger.info(f'{mount_folder} created sucesfully')

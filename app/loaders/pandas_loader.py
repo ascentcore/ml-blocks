@@ -5,6 +5,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 class PandasLoader:
 
     dataset = None
@@ -24,9 +25,9 @@ class PandasLoader:
         except:
             logger.info(f'Unable to load file {data_file} ')
 
-        # current_dataset = self.process_fn(self, current_dataset) 
-            
-        if isinstance(self.dataset, pd.DataFrame):                
+        # current_dataset = self.process_fn(self, current_dataset)
+
+        if isinstance(self.dataset, pd.DataFrame):
             self.dataset = self.dataset.append(current_dataset)
         else:
             self.dataset = current_dataset
@@ -55,5 +56,8 @@ class PandasLoader:
     def load_content(self, file_location, *args):
         return self._create_or_append_to_dataset(file_location)
 
-    def query(self, page=0, count=100, format = ''):
+    def formats(self):
+        return ['application/json']
+
+    def query(self, page=0, count=100, format=''):
         return json.loads(self.dataset[page * count:page * count + count].to_json(orient='records'))

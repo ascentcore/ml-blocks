@@ -2,8 +2,10 @@ import logging
 import time
 import shutil
 import os
-from typing import Dict
+import base64
+
 from fastapi.responses import FileResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -64,19 +66,25 @@ class FileLoader:
             self.dataset.append(file_location)
         return file_location
 
-    def query(self, page = 0, count = 100, format = 'application/json'):
+    def formats(self):
+        return ['application/file', 'application/json']
+
+    def query(self, page=0, count=100, format='application/json'):
         if format is None or format == 'application/json':
-            offset=page * count
-            file_list=self.dataset[offset:offset+count]
-            resp=[]
+            offset = page * count
+            file_list = self.dataset[offset:offset+count]
+            resp = []
             for file_name in file_list:
-                f=open(file_name, "rb")
-                filename=file_name.split("/")[-1]
+                f = open(file_name, "rb")
+                filename = file_name.split("/")[-1]
                 resp.append({
                     "name": filename,
-                    "base64encoded": f.read()}
-                )
+                    "base64encoded": base64.b64encode(f.read())
+                })
 
             return resp
+        elif format == 'application/file':
+            file_name = self.dataset[page]
+            return FileResponse(file_name)
         else:
             raise Exception('FileLoader supports only "application/json"')

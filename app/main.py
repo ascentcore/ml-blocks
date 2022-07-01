@@ -34,6 +34,7 @@ initialize_folder('statics')
 initialize_folder('models')
 
 
+
 listeners = {'data': -1, 'model': -1, 'preferences': -1}
 
 for file in listeners.keys():
@@ -86,9 +87,11 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.on_event("startup")
 @repeat_every(seconds=3)  # 1 hour
 def remove_expired_tokens_task() -> None:
+    flow.initialize()
     check_file_updates()
 
 
 @app.on_event('shutdown')
 async def shutdown():
     logger.info('Unregistering Block Thread')
+    flow.unsubscribe()

@@ -39,3 +39,10 @@ def get_dataset_length(
     flow: Flow = Depends(get_flow)
 ):
     return flow.loader.query(page, count, format)
+
+
+@router.get("/formats")
+def get_formats(
+    flow: Flow = Depends(get_flow)
+):
+    return flow.loader.formats()
