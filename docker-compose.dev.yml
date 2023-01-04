@@ -4,10 +4,10 @@ services:
   app_root_ds:
     volumes:
       - .:/app
-      - ./stores/rf:/app/data
-      # - ./samples/scheduled:/app/app/block
-      - ./samples/random-forest:/app/app/block      
-      - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
+      - ./stores/basic:/app/data
+      - ./samples/loader_test:/app/app/block
+      # - ./samples/random-forest:/app/app/block      
+      # - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
       # - ./samples/echo:/app/app/block
     build:
       context: .
@@ -26,14 +26,13 @@ services:
   # app_ds_1:
   #   volumes:
   #     - .:/app
-  #     - ./stores/ds:/app/data
+  #     - ./stores/ds1:/app/data
   #   build:
   #     context: .
   #     dockerfile: Dockerfile
   #     args:
   #       - INSTALL_DEV=true
   #   environment:
-  #     - LOADER=pandas
   #     - REGISTRY=app_root_ds
   #   ports:
   #     - "9081:80"
@@ -41,7 +40,6 @@ services:
   #   # command: [ "/app/start.sh" ]
   #   networks:
   #     - ml-blocks-net
-
 
 volumes:
   store-data-volume: null

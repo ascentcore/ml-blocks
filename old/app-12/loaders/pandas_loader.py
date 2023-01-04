@@ -57,7 +57,7 @@ class PandasLoader:
         return self._create_or_append_to_dataset(file_location)
 
     def formats(self):
-        return ['application/json']
+        return [{'format': 'application/json', 'count': 10000}]
 
     def query(self, page=0, count=100, format=''):
         return json.loads(self.dataset[page * count:page * count + count].to_json(orient='records'))

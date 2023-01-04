@@ -32,27 +32,33 @@ services:
     environment:
       - REGISTRY=root_block
       - DATA_DEPENDENCY=root_block
+    ports:
+      - "9081:80"
     command: [ "/app/start_dev.sh" ]
     # command: [ "/app/start.sh" ]
     networks:
       - ml-blocks-net
 
-  # ds_root_d2:
-  #   volumes:
-  #     - .:/app
-  #     - ./stores/ds_root_d2:/app/data
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     args:
-  #       - INSTALL_DEV=true
-  #       - DATA_DEPENDENCY=ds_root_d1
-  #   environment:
-  #     - REGISTRY=root_block
-  #   command: [ "/app/start_dev.sh" ]
-  #   # command: [ "/app/start.sh" ]
-  #   networks:
-  #     - ml-blocks-net
+  link2:
+    depends_on:
+      - link1
+    volumes:
+      - .:/app
+      - ./stores/ds_root_d2:/app/data
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - INSTALL_DEV=true
+    ports:
+      - "9082:80"
+    environment:
+      - REGISTRY=root_block
+      - DATA_DEPENDENCY=link1
+    command: [ "/app/start_dev.sh" ]
+    # command: [ "/app/start.sh" ]
+    networks:
+      - ml-blocks-net
 
 volumes:
   store-data-volume: null

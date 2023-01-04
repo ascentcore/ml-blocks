@@ -2,6 +2,7 @@ import logging
 import socket
 import json
 import os
+import requests
 
 from app.decorators.singleton import singleton
 from app.settings import settings
@@ -21,8 +22,8 @@ class Registry:
                 f'Block initialized with registry {settings.REGISTRY} [Host: {registry_host}]')
             connect(f'http://{settings.REGISTRY}/api/v1/registry/subscribe?hostname={settings.HOSTNAME}', method='post', data={
                 'block_host': settings.HOST,
-                'data_dependency': settings.DATA_DEPENDENCY,
-                'data_dependency_host': socket.gethostbyname(settings.DATA_DEPENDENCY),
+                'registry': False,
+                'default_data_dependency': socket.gethostbyname(settings.DATA_DEPENDENCY),
                 'name': name
             }, on_connect=on_connect)
         else:
@@ -32,13 +33,25 @@ class Registry:
             for root, dirs, files in os.walk(f'{settings.MOUNT_FOLDER}/registry/'):
                 for file in files:
                     if file.endswith('.json'):
-                        self.update(file[:-5], {'registered': False})
-            logger.info('>>>>>>>>>> <<<<<<<<<<<<<<<')
-            logger.info(settings.HOSTNAME)
-            self.subscribe(settings.HOSTNAME, {
-                           'block_host': settings.HOST,
-                           'name': name,
-                           'registry': True})
+                        self.update_registry(file[:-5], {}, {'registered': False})
+
+            self.update_registry(settings.HOSTNAME, {
+                'stage': 'pending',
+                'block_host': settings.HOST,
+                'name': name,
+                'registry': True}, {'registered': True})
+
+    
+    async def get_data_parent_meta(self):
+        if settings.DATA_DEPENDENCY is not None:
+            count = requests.get(f'http://{settings.DATA_DEPENDENCY}/api/v1/data/count').json()
+            formats = requests.get(f'http://{settings.DATA_DEPENDENCY}/api/v1/data/formats').json()
+
+            return {
+                'count': count,
+                'formats': formats
+            }
+    
 
     def initialize(self):
         pass
@@ -51,20 +64,37 @@ class Registry:
         else:
             self.update(settings.HOST, data)
 
-    def subscribe(self, host, data={}):
-        logger.info(f'Subscribed Host: {host}')
-        data.update({'registered': True})
+    def update_registry(self, host, data={}, override_data={}):
+        file_name = f'{settings.MOUNT_FOLDER}/registry/{host}.json'
+        overrides = ['data_dependency']
+
+        data_obj = {}
+
+        try:
+            if os.path.exists(file_name):
+                data_obj = json.load(open(file_name, 'r'))
+        except Exception as e:
+            logger.error(e)
+
+        data.update(data_obj)
+        for key in overrides:
+            if data_obj.get(key):
+                data[key] = data_obj[key]
+
+        for key in overrides:
+            if f'default_{key}' in data.keys() and key not in data.keys():
+                data[key] = data[f'default_{key}']
+
+        data.update(override_data)
 
         json.dump(data, open(
             f'{settings.MOUNT_FOLDER}/registry/{host}.json', 'w'), indent=2)
 
-        logger.info(f'dumped to {settings.MOUNT_FOLDER}/registry/{host}.json')
-
     def unsubscribe(self):
-        logger.info('************************************')
-        logger.info(f'Sending unsubscribe event')
         connect(
-            f'http://{settings.REGISTRY}/api/v1/registry/subscribe?hostname={settings.HOSTNAME}', method='delete')
+            f'http://{settings.REGISTRY}/api/v1/registry/update?hostname={settings.HOSTNAME}', method='put', data={
+                'stage': 'stopped'
+            })
 
     def delete(self, host):
         try:
@@ -73,16 +103,11 @@ class Registry:
         except:
             pass
 
-    def update(self, host, data={}):
-        logger.info(f'Updating Host: {host}')
-        data_obj = json.load(
-            open(f'{settings.MOUNT_FOLDER}/registry/{host}.json', 'r'))
-        data_obj.update(data)
-        json.dump(data_obj, open(
-            f'{settings.MOUNT_FOLDER}/registry/{host}.json', 'w'), indent=2)
-
     def get_graph(self):
         for root, dirs, files in os.walk(f'{settings.MOUNT_FOLDER}/registry/'):
             for file in files:
                 if file.endswith('.json'):
                     yield json.load(open(f'{root}/{file}', 'r'))
+
+    def fetch_from_upstream(self, page, count, format):
+        return requests.get(f'http://{settings.DATA_DEPENDENCY}/api/v1/data?page={page}&count={count}&format={format}')

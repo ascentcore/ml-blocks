@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter,  Depends, Request
+from fastapi.responses import RedirectResponse
 from app.deps import get_flow
 from app.flow import Flow
 
@@ -16,7 +17,7 @@ async def train(
 ):
     logger.info(f'Called subscribe')
     data = await request.json()
-    flow.registry.subscribe(hostname, data)
+    flow.registry.update_registry(hostname, data)
 
 
 @router.delete("/subscribe")
@@ -34,9 +35,9 @@ async def train(
     request: Request,
     flow: Flow = Depends(get_flow),
 ):
-    logger.info(f'Called subscribe')
+    logger.info(f'Updating registry for hostname: {hostname}')
     data = await request.json()
-    flow.registry.update(hostname, data)
+    flow.registry.update_registry(hostname, {}, data)
 
 
 @router.get("/graph")

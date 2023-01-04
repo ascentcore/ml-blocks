@@ -1,241 +1,138 @@
 import logging
+import asyncio
 import pickle
-import time
-import json
 
-from app.block.block import Block
-from app.decorators.singleton import singleton
-from app.loaders import get_loader
-from app.settings import settings
-from app.runtime import Runtime
-from app.registry import Registry
+from app.settings import initialize_folder
+
+# from app.listeners import load_data_file
 
 logger = logging.getLogger(__name__)
 
-default_stages = ['load_data', 'train', 'generate_statics']
-
-
-@singleton
 class Flow:
 
-    loaders = []
+    schedules = {}
 
-    stage = 'pending'
+    def __init__(self, block):
+        self.block = block
+        initialize_folder('models')
+        logger.info(f'Flow initialized {self.block.name}')
 
-    def __init__(self, touch):
-        logger.info('Flow initialized...')
-        self.block = Block()
-        self.registry = Registry(self.block.name, self.on_connect)
-        self._touch_file = touch
 
-        logger.info(f'Initializing block {self.block.name}')
-
-        self.runtime = self._prepare_runtime_object()
-
-        self.block.load_model(self.runtime)
-        self.preferences_update()
-
-        self.call_method('on_initialize', self.runtime)
-        logger.info(
-            f'Block: "{self.block.name}" [Host: {settings.HOST}] runtime initialized.')
-
-    def initialize(self):
-        self.registry.initialize()
-    
-    def on_connect(self):
-        logger.info('<<<<< Connected')
-        self.registry.send_data({'stage': self.stage})
-
-    def unsubscribe(self):
-        self.registry.unsubscribe()
-
-    def trigger(self, stage):
-        logger.info(f'Moving block to stage {stage} and triggering execution')
-        self.stage = stage
-        self.next()
-
-    def set_stage_and_execute(self, stage: str, stages=default_stages, data=None):
-        self.stages = stages
-        self.stage = stage
-        self.runtime.last_op_data = data
-        self.next()
-
-    def next(self):
-        current_stage_idx = self.stages.index(self.stage)
-        logger.info('Executing stage: ' + self.stage)
-
+    def initialize_model(self):
         try:
-            for local_stage in [f'on_before_{self.stage}', self.stage, f'on_after_{self.stage}']:
-                logger.debug(f'> Executing local stage: {local_stage}')
-                self.write_stage(local_stage)
-                if hasattr(self.block, local_stage):
-                    last_op_data = self.call_method(local_stage, self.runtime)
-                    self.runtime.last_op_data = last_op_data
-                if local_stage == 'train':
-                    self.block.save_model(runtime=self.runtime)
-                    self._touch_file('model')
-
-            if current_stage_idx < len(self.stages) - 1:
-                self.stage = self.stages[current_stage_idx+1]
-
-                # Move this to a background task
-                self.next()
+            logger.info('Loading model')
+            model = self.block.load_model()
+            if model != None:
+                logger.info(f'Loaded model: {model}')
+                self.model = model
             else:
-                self.stage = 'pending'
+                logger.info('load_model method not provided. Downgrading to pickle')
+                try:
+                    infile = open(f'{self.block.settings.MOUNT_FOLDER}/models/model.pkl', 'rb')
+                    model = pickle.load(infile)
+                    infile.close()
+                except:
+                    logger.info('No model found, starting with empty state')
+                    pass
         except Exception as e:
-            # logger.error(e)
-            logger.exception(e)
-            self.report_error(local_stage)
+            logger.info(f'No model found, training new model: {e}')
 
-        # if increment and len(self.stages):
-        #     self.stage = self.stages[current_stage_idx+1]
+    def to_storage(self,from_scratch = False):
+        loaders = self.block.root_loaders
 
-    def write_stage(self, stage):
-        with open(f'{settings.MOUNT_FOLDER}/internal/stage', 'w') as fp:
-            fp.write(stage)
-            fp.close()
+        root_loader = loaders[0]
+        
+        if (from_scratch == True):
+            self.block.storage.clear()
 
-    def _pass_through_process_fn(self, loader, dataset):
-        return dataset
+        # for now we are just working with the root entry
+        for data in root_loader.entries():
+            if (self.block.storage.is_completed(data)):
+                logger.info(f'Entry already parsed, skipping...')
+                continue
 
-    def _prepare_runtime_object(self):
-
-        logger.info('Preparing runtime object')
-        runtime = Runtime()
-        runtime.report_progress = self.report_progress
-        runtime.settings = settings
-        runtime.last_op_data = None
-
-        logger.info(hasattr(self.block, 'loaders'))
-
-        if hasattr(self.block, 'loaders'):
-            prev_loader_content = None
-            loaders = []
-            for loader in self.block.loaders:
-                logger.info(f'Trying to initialize loader {loader}')
-                loader_implementation = None
-                if isinstance(loader, str):
-
-                    try:
-                        loader_implementation = get_loader(loader, settings)
-                        loader_implementation.process_fn = getattr(self.block, 'process_data') if hasattr(
-                            self.block, 'process_data') else self._pass_through_process_fn
-                    except Exception as e:
-                        logger.error(
-                            f'Unable to initialize loader {loader}. Root Cause: {e}')
+            logger.info(f'New entry found, parsing...')
+            for item in self.block.itemize(data, root_loader):
+                if (self.block.filter(item, root_loader)):
+                    self.block.storage.store(item)                    
                 else:
-                    loader_implementation = loader
+                    logger.info(f'Rejected: {item}')
+            self.block.storage.set_completed(data)
+        
+        logger.info(f'Stored {self.block.storage.count()} items')
 
-                if loader_implementation is not None:
-                    prev_loader_content = loader_implementation.initialize(
-                        settings, prev_loader_content)
-                    loaders.append(loader_implementation)
+        # logger.info('Preparing to train model')
+        # self.run_fn_in_background(self._train_model, 'Train Model')
+        # logger.info('Ingestion complete')
 
-                self.loader = loader_implementation
+    # def register(self, hostname):
+    #     data = load_data_file('data')
+    #     data[hostname]
 
-            self.loaders = loaders
-            runtime.loader = loader_implementation
+    async def build_model(self):
+        model = await self.block.train()
+        if model != None:
+            logger.info(f'Trained model: {model}')
+            if (self.block.save_model(model)):
+                logger.info('Model saved')
+            else:
+                logger.info('Method save_model not provided. Downgrading to pickle')
+                outfile = open(f'{self.block.settings.MOUNT_FOLDER}/models/model.pkl', 'wb')
+                pickle.dump(model, outfile)
+                outfile.close()
+        else:
+            logger.info('No model trained')
 
-        def load_data_content(file, append):
-            self.load_data_files([file], append)
 
-        runtime.load_data_content = load_data_content
+    def query(self, page=0, count=100):
+        return self.block.storage.query(page, count)
 
-        for fn in [self.save_model, self.load_model, self.predict]:
-            func_name = fn.__name__
-            setattr(self.block, func_name, getattr(self.block, func_name) if hasattr(
-                self.block, func_name) else fn)
 
-        return runtime
-
-    def load_data_files(self, files, append):
-        if not append:
-            for loader in self.loaders:
-                loader.clean()
-
-        self.call_method('on_before_load_data', self.runtime)
-
+    def run_fn_in_background(self, fn: callable, name='Untitled Background'):
+        logger.info(f'Running {name} in background')
         try:
-            for file in files:
-                last_content = file
-                for loader in self.loaders:
-                    last_content = loader.load_content(last_content)
-        except Exception as e:
-            logger.exception(e)
-            self.report_error('load_data')
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        if loop and loop.is_running():
+            loop.create_task(fn())
+        else:
+            asyncio.run(fn())
 
-        self.call_method('on_after_load_data', self.runtime)
-        self._touch_file('data')
-        self.stages = ['train', 'generate_statics']
-        self.stage = 'train'
-        self.next()
 
-    def call_method(self, method: str, *args, **kwargs):
-        logger.info(f'Trying to call {method}')
-        if hasattr(self.block, method):
-            method_to_call = getattr(
-                self.block, method)
-            return method_to_call(*args, **kwargs)
+    # def schedule_fn_call(self, callback: callable, interval: int, name='Untitled Schedule'):
+    #     logger.info(
+    #         f'Schedule [{name}] scheduled to run every {interval} seconds')
+    #     try:
+    #         loop = asyncio.get_running_loop()
+    #     except RuntimeError:
+    #         loop = None
 
-    def report_error(self, method):
-        self.stage = f'{method}_error'
-        self.write_stage(f'{method}_error')
-        self.call_method('on_error', self.runtime, method)
+    #     id = f'schedule-{random.randint(100, 999)}'
 
-    def report_progress(self, percent: int):
-        logger.info(f'Reporting progress... {percent}%')
-        return None
+    #     if loop and loop.is_running():
+    #         loop.create_task(self.perform_schedule_execution(
+    #             id, callback, interval, name))
+    #     else:
+    #         asyncio.run(self.perform_schedule_execution(
+    #             id, callback, interval, name))
 
-    def set_error_state(self, state):
-        pass
+    #     self.schedules[id] = {
+    #         "state": True
+    #     }
 
-    ''' 
-    Global Changes Event Listeners
-    Some aspects of the flow should be reinitialized when one application thread
-    is making any change to data or the models
-    '''
+    # async def perform_schedule_execution(self, id: str, fn: callable,  interval: int, name: str):
+    #     while True:
+    #         if self.schedules[id]["state"] is True:
+    #             try:
+    #                 logger.info(f'Running scheduled call {name} with {id}')
+    #                 fn()
+    #             except Exception as e:
+    #                 logger.error(f'Error while running schedule call {name}')
+    #                 logger.exception(e)
+    #                 pass
 
-    def data_update(self):
-        logger.info('Data updated triggering loaders')
-        prev_loader_content = None
-        for loader in self.loaders:
-            prev_loader_content = loader.initialize(
-                settings, prev_loader_content)
-
-    def model_update(self):
-        logger.info('Model updated, reloading model')
-        self.block.load_model(self.runtime)
-
-    def preferences_update(self):
-        logger.info('Preferences updated. Reloading ...')
-        try:
-            self.runtime.preferences = json.loads(
-                f'{self.runtime.settings.MOUNT_FOLDER}/internal/preferences.json')
-        except Exception as e:
-            logger.info('Unable to reload preferences')
-            logger.error(e)
-
-    def save_model(self, runtime):
-        logger.info('Attempting to save model ...')
-        runtime.model = runtime.last_op_data
-        if runtime.model is None:
-            raise Exception('train method returned no model to save')
-
-        pickle.dump(runtime.model, open(
-            f'{runtime.settings.MOUNT_FOLDER}/models/model.pkl', 'wb'))
-
-        logger.info("Model saved successfully")
-
-    def load_model(self, runtime):
-        logger.info('Attempting to load_model')
-        try:
-            infile = open(
-                f'{runtime.settings.MOUNT_FOLDER}/models/model.pkl', 'rb')
-            self.runtime.model = pickle.load(infile)
-            infile.close()
-            logger.info('Model loaded successfully')
-        except Exception as e:
-            logger.error(e)
-
-    def predict(self, runtime):
-        return self.runtime.model.predict(runtime.last_op_data)
+    #             if interval > 0:
+    #                 await asyncio.sleep(interval)
+    #             else:
+    #                 break

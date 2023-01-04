@@ -3,10 +3,13 @@ import os
 import logging
 import shutil
 
+from pydantic import BaseSettings
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class Settings():
+
+class Settings(BaseSettings):
     RUN_ENV: str = os.getenv("RUN_ENV", "")
     ENV_DEVELOPMENT: bool = RUN_ENV == "development"
     PROJECT_NAME: str = "ML-Blocks API"
@@ -17,13 +20,8 @@ class Settings():
     DATA_DEPENDENCY: str = os.getenv("DATA_DEPENDENCY", None)
     LOGIC_DEPENDENCIES: str = os.getenv("LOGIC_DEPENDENCIES", None)
     REGISTRY: str = os.getenv("REGISTRY", None)
-    try:
-        HOST: str = socket.gethostbyname(socket.gethostname())
-        HOSTNAME: str = os.getenv("HOSTNAME", HOST)
-    except:
-        HOST = "localhost"
-        HOST = "localhost"
-        pass
+    HOST: str = socket.gethostbyname(socket.gethostname())
+    HOSTNAME: str = os.getenv("HOSTNAME", HOST)
 
     class Config:
         case_sensitive = True
