@@ -15,7 +15,7 @@ class FileLoader(BaseLoader):
 
     def __init__(self, settings):
         self.mount_folder = settings.MOUNT_FOLDER
-        self.storage_folder = f'{settings.MOUNT_FOLDER}/file_loader_files'
+        self.storage_folder = 'file_loader_files'
         self.current_hash = None
         self.initialize()
 
@@ -28,9 +28,11 @@ class FileLoader(BaseLoader):
 
     def refresh(self):
         self.dataset = []
-        for root, _, f_names in os.walk(self.storage_folder):
+        for root, _, f_names in os.walk(f'{self.mount_folder}/{self.storage_folder}'):
             for f in f_names:
                 self.dataset.append(os.path.join(root, f))
+        
+        logger.info(f'Refreshed file loader dataset. {len(self.dataset)}')
 
 
     def count(self):

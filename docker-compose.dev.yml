@@ -5,7 +5,7 @@ services:
     volumes:
       - .:/app
       - ./stores/basic:/app/data
-      - ./samples/loader_test:/app/app/block
+      - ./samples/blocks/loader_test:/app/app/block
       # - ./samples/random-forest:/app/app/block      
       # - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
       # - ./samples/echo:/app/app/block

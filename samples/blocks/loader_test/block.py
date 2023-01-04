@@ -18,10 +18,11 @@ class Block(BaseBlock):
         super().__init__(settings)
 
     def itemize(self, data, loader):
-        rows = csv.reader(data.split('\n'), delimiter=',')
-        for index, row in enumerate(rows):
-            if index > 0 and len(row) > 0:
-                yield [row[0], float(row[1]), float(row[2]), float(row[3])]
+        with open(data, newline='\n') as csvfile:
+            rows = csv.reader(csvfile, delimiter=',')
+            for index, row in enumerate(rows):
+                if index > 0 and len(row) > 0:
+                    yield [row[0], float(row[1]), float(row[2]), float(row[3])]
 
     def filter(self, item, loader):
         return item[1] > 0.2

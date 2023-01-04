@@ -15,6 +15,7 @@ class Flow:
     def __init__(self, block):
         self.block = block
         initialize_folder('models')
+        self.to_storage()
         logger.info(f'Flow initialized {self.block.name}')
 
 

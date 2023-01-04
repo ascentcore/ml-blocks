@@ -42,4 +42,5 @@ def initialize_folder(name: str, remove = False):
         os.mkdir(mount_folder)
         logger.info(f'{mount_folder} created sucesfully')
     except:
+        logger.info(f'{mount_folder} already exists or cannot be created')
         pass
