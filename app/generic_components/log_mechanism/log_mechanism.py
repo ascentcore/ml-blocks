@@ -3,6 +3,7 @@ from enum import Enum
 
 from app.generic_components.file_wrapper.file_wrapper import WrapperFile
 from app.generic_components.singleton_base.singleton_base import Singleton
+from app.generic_components.generic_types.error import ErrorNotPresent
 
 
 class LogOutputType(Enum):
@@ -72,7 +73,10 @@ class LogProperties(metaclass=Singleton):
         """
         if LogOutput.is_active(self.configuration.output, LogOutputType.file):
             if self.configuration.clear_on_start:
-                WrapperFile.remove(path=self.configuration.file_log)
+                try:
+                    WrapperFile.remove(path=self.configuration.file_log)
+                except ErrorNotPresent:
+                    pass
             handler_file = logging.FileHandler(self.configuration.file_log)
             handler_file.setLevel(self.configuration.level)
             handler_file.setFormatter(formatter)
