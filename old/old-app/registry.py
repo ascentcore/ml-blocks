@@ -4,10 +4,10 @@ import socket
 import sqlite3
 import requests
 
-from app.db import models, crud, session
-from app.constants import DEPENDENCY_DATA_TYPE, DEPENDENCY_LOGIC_TYPE
+from app.db import models, session
+from app.constants import DEPENDENCY_DATA_TYPE
 from app.utils.connection_utils import do_connect
-from app.flow import Flow
+from old.cached_version.flow import Flow
 from .config import settings
 
 logger = logging.getLogger(__name__)

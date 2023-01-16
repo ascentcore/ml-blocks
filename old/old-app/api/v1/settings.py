@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db import models
-from app.deps import get_orm_db
+from old.cached_version.deps import get_orm_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

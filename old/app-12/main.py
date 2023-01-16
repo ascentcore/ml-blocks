@@ -1,17 +1,13 @@
 import logging
 import os
-import time
-import asyncio
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi_utils.tasks import repeat_every
 from starlette.middleware.cors import CORSMiddleware
 
-from app.api.v1 import api_router
-from app.deps import get_registry
-from app.flow import Flow
-from app.registry import Registry
-from app.settings import settings, initialize_folder
+from old.cached_version.api import api_router
+from old.cached_version.flow import Flow
+from old.cached_version.settings import settings, initialize_folder
 
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)

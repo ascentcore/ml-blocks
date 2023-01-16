@@ -5,9 +5,8 @@ import os
 import requests
 
 from app.decorators.singleton import singleton
-from app.settings import settings
 from app.utils.connection import connect
-from app.settings import settings, initialize_folder
+from old.cached_version.settings import settings, initialize_folder
 
 logger = logging.getLogger(__name__)
 

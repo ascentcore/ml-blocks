@@ -1,13 +1,13 @@
 import logging
 import sqlite3 as sql
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
 
-from app.flow import statics_folder
-from app.deps import get_registry
+from old.cached_version.flow import statics_folder
+from old.cached_version.deps import get_registry
 
 from .api.v1 import api_router
 from .config import settings

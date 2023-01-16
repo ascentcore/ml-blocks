@@ -2,12 +2,11 @@ import logging
 import pickle
 import math
 import json
-from app import loaders
 
-from app.block.block import Block
+from old.cached_version.block import Block
 from app.decorators.singleton import singleton
 from app.loaders import get_loader
-from app.settings import settings
+from old.cached_version.settings import settings
 from app.runtime import Runtime
 from app.registry import Registry
 

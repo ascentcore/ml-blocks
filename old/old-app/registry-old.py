@@ -3,7 +3,7 @@ import logging
 import socket
 import requests
 from app.db import models, crud
-from app.flow import Flow
+from old.cached_version.flow import Flow
 
 from .config import settings
 

@@ -74,7 +74,7 @@ data/*
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs.html/_build/
 
 node_modules
 

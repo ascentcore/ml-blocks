@@ -1,0 +1,7 @@
+{
+  "project_name": "ML-Blocks API",
+  "run_env": "development",
+  "version": "1.0.0",
+  "api_v1_str": "/api/v1",
+  "mount_folder": "/app/data"
+}

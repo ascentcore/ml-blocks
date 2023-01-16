@@ -1,27 +1,27 @@
-import logging
+"""
+ML Blocks startup
+"""
+# !/usr/bin/env python
+import os
+import sys
 
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
-from app.api.v1 import api_router
-from app.settings import settings, initialize_folder
 
-from app.flow import Flow
-import app.deps
+from app.generic_components.fastapi_wrapper.fastapi_app_wrapper import FastApiApp
+from app.logic.builder import Builder
 
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
+try:
+    """
+    Relative path import is done to search automatically for teh modules
+    """
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.append(os.path.dirname(__file__))
+except ImportError:
+    print('Relative import failed')
 
-app = FastAPI()
+builder = Builder()
+builder.setup()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-initialize_folder('')
-initialize_folder('listeners')
-
-app.include_router(api_router, prefix=settings.API_V1_STR)
+fastapi = FastApiApp()
+app: FastAPI() = fastapi.app

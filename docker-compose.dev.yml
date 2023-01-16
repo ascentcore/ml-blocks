@@ -1,14 +1,11 @@
 version: "3.3"
 services:
-
   app_root_ds:
     volumes:
       - .:/app
       - ./stores/basic:/app/data
       - ./samples/blocks/loader_test:/app/app/block
-      # - ./samples/random-forest:/app/app/block      
-      # - ./samples/random-forest/requirements.txt:/app/requirements_local.txt
-      # - ./samples/echo:/app/app/block
+      - /var/run/docker.sock:/var/run/docker.sock
     build:
       context: .
       dockerfile: Dockerfile
@@ -16,30 +13,12 @@ services:
         - INSTALL_DEV=true
     environment:
       - LOADER=pandas
+      - MOUNT_FOLDER=/app/data
     ports:
       - "9080:80"
     command: [ "/app/start_dev.sh" ]
-    # command: [ "/app/start.sh" ]
     networks:
       - ml-blocks-net
-
-  # app_ds_1:
-  #   volumes:
-  #     - .:/app
-  #     - ./stores/ds1:/app/data
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     args:
-  #       - INSTALL_DEV=true
-  #   environment:
-  #     - REGISTRY=app_root_ds
-  #   ports:
-  #     - "9081:80"
-  #   command: [ "/app/start_dev.sh" ]
-  #   # command: [ "/app/start.sh" ]
-  #   networks:
-  #     - ml-blocks-net
 
 volumes:
   store-data-volume: null

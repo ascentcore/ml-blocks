@@ -6,7 +6,7 @@ import time
 import asyncio
 
 from typing import Callable
-from app.settings import settings
+from old.cached_version.settings import settings
 
 
 logger = logging.getLogger(__name__)
