@@ -8,8 +8,6 @@ RUN pip install --upgrade pip
 
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
-COPY ./logging.conf /app/logging.conf
-
 COPY . /app
 
 ENV PYTHONPATH=/app
