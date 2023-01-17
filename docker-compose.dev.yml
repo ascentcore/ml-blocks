@@ -4,7 +4,6 @@ services:
     volumes:
       - .:/app
       - ./stores/basic:/app/data
-      - ./samples/blocks/loader_test:/app/app/block
       - /var/run/docker.sock:/var/run/docker.sock
     build:
       context: .

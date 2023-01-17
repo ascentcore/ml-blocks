@@ -5,8 +5,6 @@ services:
     volumes:
       - .:/app 
       - ./stores/ds_root:/app/data
-      - ./samples/file-loader:/app/app/block      
-      # - ./samples/file-loader/requirements.txt:/app/requirements_local.txt
     build:
       context: .
       dockerfile: Dockerfile
@@ -23,7 +21,6 @@ services:
   link1:
     volumes:
       - .:/app
-      - ./stores/link1:/app/data
     build:
       context: .
       dockerfile: Dockerfile
@@ -44,7 +41,6 @@ services:
       - link1
     volumes:
       - .:/app
-      - ./stores/ds_root_d2:/app/data
     build:
       context: .
       dockerfile: Dockerfile
