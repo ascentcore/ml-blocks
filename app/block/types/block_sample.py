@@ -4,8 +4,8 @@ from app.logic.block.base import BlockBase
 
 class BlockSample(BlockBase):
 
-    def __init__(self):
-        super().__init__(name="BlockSample")
+    def __init__(self, loader, storage):
+        super().__init__(name="BlockSample", loader=loader, storage=storage)
         self.log = LogBase.log(self.__class__.__name__)
 
     def train(self):

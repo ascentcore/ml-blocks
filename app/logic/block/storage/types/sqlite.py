@@ -23,7 +23,7 @@ class BlockSqliteCommands(str, Enum):
 class BlockStorageSqlite(BlockStorage):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(name="BlockStorageSqlite")
         self.log = LogBase.log(self.__class__.__name__)
         self.__dataset = []
         self.__sqlite_db = WrapperSqlite()

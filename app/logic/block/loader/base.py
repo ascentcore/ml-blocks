@@ -2,6 +2,7 @@ from enum import Enum
 import app.logic.block.loader.types
 import app.block.loader
 from app.generic_components.generic_types.error import ErrorNotImplemented
+from app.generic_components.log_mechanism.log_mechanism import LOG
 from app.generic_components.plugin_loader.plugin_loader import PluginLoader
 
 
@@ -25,7 +26,9 @@ class BlockLoader:
     # For every class that inherits from the current,
     # the class name will be added to plugins
     def __init_subclass__(cls, **kwargs):
+
         super().__init_subclass__(**kwargs)
+        LOG.info(f">in {cls}")
         if type(cls) not in cls.plugins:
             cls.plugins.append(cls)
 
@@ -50,6 +53,9 @@ class BlockLoader:
         raise ErrorNotImplemented()
 
     def query(self, page=0, count=100, format='raw'):
+        raise ErrorNotImplemented()
+
+    def entries(self, format='application/file'):
         raise ErrorNotImplemented()
 
 

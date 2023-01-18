@@ -5,7 +5,7 @@ from app.logic.block.storage.base import BlockStorage
 class BlockStorageMemory(BlockStorage):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(name="BlockStorageMemory")
         self.log = LogBase.log(self.__class__.__name__)
         self.__dataset = []
         self.log.info(f'In memory storage initialized')

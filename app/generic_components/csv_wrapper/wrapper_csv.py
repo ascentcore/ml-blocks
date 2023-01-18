@@ -37,7 +37,6 @@ class WrapperCSV:
         try:
             WrapperFile.is_present(path=path)
             with open(file=path, mode=flags, newline=new_line) as file_descriptor:
-                LOG.debug(f'file_descriptor content from {file_descriptor}')
                 csv_rows = csv.reader(file_descriptor, delimiter=delimiter)
                 if headers_also:
                     yield next(csv_rows)

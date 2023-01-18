@@ -22,6 +22,8 @@ class VariableMap(IntEnum):
     BLOCK_NAME = 11
     HOST = 12
     SQLITE_STORAGE = 13
+    BLOCK_LOADER = 14
+    BLOCK_STORAGE = 15
 
 
 class Settings(metaclass=Singleton):
@@ -51,8 +53,13 @@ class Settings(metaclass=Singleton):
             VariableProperties(name=VariableMap.HOST.name,
                                default_value=str(socket.gethostbyname(socket.gethostname()))),
             VariableProperties(name=VariableMap.SQLITE_STORAGE.name,
-                               default_value="file::memory:?cache=shared")
-                               #default_value="database.db")
+                               default_value="file::memory:?cache=shared"),
+                               #default_value="database.db"),
+            VariableProperties(name=VariableMap.BLOCK_LOADER.name, default_value="BlockLoaderFile",
+                               # TODO all str to have single entry point
+                               source=VariableSource.environment),
+            VariableProperties(name=VariableMap.BLOCK_STORAGE.name, default_value="BlockStorageMemory", # TODO all str to have single entry point
+                               source=VariableSource.environment)
         ]
 
     def __init__(self):
@@ -97,6 +104,14 @@ class Settings(metaclass=Singleton):
     @property
     def active_block(self):
         return self.__variables[VariableMap.BLOCK_NAME].value
+
+    @property
+    def active_block_loader(self):
+        return self.__variables[VariableMap.BLOCK_LOADER].value
+
+    @property
+    def active_block_storage(self):
+        return self.__variables[VariableMap.BLOCK_STORAGE].value
 
     def get_variable(self, variable):
         return self.__variables[variable].value

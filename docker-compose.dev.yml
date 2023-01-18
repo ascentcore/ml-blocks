@@ -14,7 +14,8 @@ services:
       - LOADER=pandas
       - MOUNT_FOLDER=/app/data
       - BLOCK_NAME=CSV Block #  BlockSimple
-      - BLOCK_LOADER=BlockLoaderFile # CSV Block
+      - BLOCK_LOADER=BlockLoaderFile # BlockLoaderFile
+      - BLOCK_STORAGE=BlockStorageSqlite # BlockStorageMemory
     ports:
       - "9080:80"
     command: [ "/app/start_dev.sh" ]

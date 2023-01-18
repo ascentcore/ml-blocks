@@ -6,14 +6,14 @@ from app.generic_components.csv_wrapper.wrapper_csv import WrapperCSV
 from app.generic_components.log_mechanism.log_mechanism import LogBase
 from app.logic.block.base import BlockBase
 from app.logic.block.filters.filter import bigger_then
-from app.logic.block.storage.sqlite import BlockStorageSqlite
 
 
 class BlockCSV(BlockBase):
 
-    def __init__(self):
+    def __init__(self, loader, storage):
         super().__init__(name="CSV Block",
-                         storage=BlockStorageSqlite())
+                         loader=loader,
+                         storage=storage)
         self.log = LogBase.log(self.__class__.__name__)
         self.__lock = Lock()
 
@@ -47,7 +47,8 @@ class BlockCSV(BlockBase):
                     if self.filter(item=item):
                         self.storage.store(item)
                     else:
-                        self.log.debug(f'Rejected: {item}')
+                        pass
+                        # self.log.debug(f'Rejected: {item}')
                 self.storage.set_completed(data)
                 self.lock.release()
 

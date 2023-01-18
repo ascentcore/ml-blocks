@@ -6,9 +6,8 @@ from app.configuration.settings import Settings
 from app.generic_components.generic_types.error import ErrorNotImplemented
 from app.generic_components.log_mechanism.log_mechanism import LogBase
 from app.generic_components.plugin_loader.plugin_loader import PluginLoader
-from app.logic.block.loader.types.file import BlockLoaderFile
+from app.logic.block.loader.base import BlockLoader
 from app.logic.block.storage.base import BlockStorage
-from app.logic.block.storage.memory import BlockStorageMemory
 
 # where to search for extensions
 BlockSources = [app.block.types.__file__, app.logic.block.types.__file__]
@@ -26,19 +25,18 @@ class BlockBase:
         if type(cls) not in cls.plugins:
             cls.plugins.append(cls)
 
-    def __init__(self, name="",
-                 loader=BlockLoaderFile(),
-                 storage: BlockStorage = BlockStorageMemory()):
+    def __init__(self,
+                 name="BlockSimple",
+                 loader=BlockLoader(),
+                 storage=BlockStorage()):
         super().__init__()
 
         self.log = LogBase.log(self.__class__.__name__)
         self.__settings = Settings()
         self.__name = name
-        if len(name) == 0:
-            self.__name = self.__settings.block_name
-        self.log.debug("Initialized block {}".format(self.__name))
         self.__loader = loader
         self.__storage = storage
+        self.log.debug("Initialized block {}".format(self.__name))
 
     @property
     def name(self):
