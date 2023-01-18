@@ -15,6 +15,8 @@ class Builder(LogicInterface):
         self.__settings = Settings()
         self.__router = RouterMain()
         self.__fastapi_app = FastApiApp()
+        
+        self.__settings.print()
         self.log.info("Initialized application {}-{}".format(self.__settings.version, self.__settings.environment))  # TODO add version here
 
     def __del__(self):

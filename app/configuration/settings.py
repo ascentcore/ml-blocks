@@ -46,7 +46,7 @@ class Settings(metaclass=Singleton):
                                source=VariableSource.environment),
             VariableProperties(name=VariableMap.HOSTNAME.name, default_value="localhost",
                                source=VariableSource.environment),
-            VariableProperties(name=VariableMap.BLOCK_NAME.name, default_value="Pass Through ML Block",
+            VariableProperties(name=VariableMap.BLOCK_NAME.name, default_value="BlockSimple",
                                source=VariableSource.environment),
             VariableProperties(name=VariableMap.HOST.name,
                                default_value=str(socket.gethostbyname(socket.gethostname()))),
@@ -61,15 +61,14 @@ class Settings(metaclass=Singleton):
         self.load_variables()
 
     def load_variables(self):
-        self.log.debug("Loaded values:")
         for properties in self.__variables_properties:
             variable = Variable(properties=properties)
             self.__variables.append(variable)
-            self.log.debug('\t {} = {}'.format(variable.name, variable.value))
 
-    @property
-    def block_name(self):
-        return self.__variables[VariableMap.BLOCK_NAME].value
+    def print(self):
+        self.log.debug("Loaded values:")
+        for variable in self.__variables:
+            self.log.debug('\t {} = {}'.format(variable.name, variable.value))
 
     @property
     def mount_folder(self):
@@ -94,3 +93,10 @@ class Settings(metaclass=Singleton):
     @property
     def sqlite_database(self):
         return self.__variables[VariableMap.SQLITE_STORAGE].value
+
+    @property
+    def active_block(self):
+        return self.__variables[VariableMap.BLOCK_NAME].value
+
+    def get_variable(self, variable):
+        return self.__variables[variable].value

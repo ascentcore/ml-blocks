@@ -4,7 +4,7 @@ import pandas as pd
 
 from app.generic_components.csv_wrapper.wrapper_csv import WrapperCSV
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.base import BlockBase, BlockType
+from app.logic.block.base import BlockBase
 from app.logic.block.filters.filter import bigger_then
 from app.logic.block.storage.sqlite import BlockStorageSqlite
 
@@ -12,8 +12,7 @@ from app.logic.block.storage.sqlite import BlockStorageSqlite
 class BlockCSV(BlockBase):
 
     def __init__(self):
-        super().__init__(name="CSV Block loader",
-                         block_type=BlockType.csv_loader,
+        super().__init__(name="CSV Block",
                          storage=BlockStorageSqlite())
         self.log = LogBase.log(self.__class__.__name__)
         self.__lock = Lock()
@@ -59,5 +58,3 @@ class BlockCSV(BlockBase):
 
     def query(self, page=0, count=100, format='raw'):
         return self.loader.query(page, count, format)
-
-

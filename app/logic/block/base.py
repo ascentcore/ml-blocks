@@ -1,24 +1,32 @@
 from enum import Enum
-from typing import List
 
+import app.block.types
+import app.logic.block.types
 from app.configuration.settings import Settings
 from app.generic_components.generic_types.error import ErrorNotImplemented
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.loader.base import BlockLoader
-from app.logic.block.loader.file import BlockLoaderFile
+from app.generic_components.plugin_loader.plugin_loader import PluginLoader
+from app.logic.block.loader.types.file import BlockLoaderFile
 from app.logic.block.storage.base import BlockStorage
 from app.logic.block.storage.memory import BlockStorageMemory
 
-
-class BlockType(str, Enum):
-    base = "base"
-    csv_loader = "csv_loader"
+# where to search for extensions
+BlockSources = [app.block.types.__file__, app.logic.block.types.__file__]
 
 
 class BlockBase:
+    """Basic resource class. Concrete resources will inherit from this one
+    """
+    plugins = []
+
+    # For every class that inherits from the current,
+    # the class name will be added to plugins
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if type(cls) not in cls.plugins:
+            cls.plugins.append(cls)
 
     def __init__(self, name="",
-                 block_type=BlockType.base,
                  loader=BlockLoaderFile(),
                  storage: BlockStorage = BlockStorageMemory()):
         super().__init__()
@@ -28,18 +36,9 @@ class BlockBase:
         self.__name = name
         if len(name) == 0:
             self.__name = self.__settings.block_name
-        self.__type = block_type
         self.log.debug("Initialized block {}".format(self.__name))
         self.__loader = loader
         self.__storage = storage
-
-    @property
-    def type(self):
-        return self.__type
-
-    @type.setter
-    def type(self, value):
-        self.__type = value
 
     @property
     def name(self):
@@ -80,3 +79,6 @@ class BlockBase:
 
     def count(self):
         raise ErrorNotImplemented()
+
+
+PluginLoader.load_plugins(sources=BlockSources)

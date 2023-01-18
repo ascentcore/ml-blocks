@@ -64,7 +64,7 @@ class LoaderFileInjectFile(LoaderFileInject):
 class BlockLoaderFile(BlockLoader):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(name="BlockLoaderFile")
         self.log = LogBase.log(self.__class__.__name__)
         self.__settings = Settings()
         self.__folder_path = f'{self.__settings.mount_folder}/{self.__settings.storage_folder}'
