@@ -1,5 +1,5 @@
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.loader.base import BlockLoader
+from app.logic.block.loader.base import BlockLoader, BlockFormats
 
 
 class BlockLoaderSample(BlockLoader):
@@ -14,5 +14,5 @@ class BlockLoaderSample(BlockLoader):
     def refresh(self):
         self.log.warn("implementation not done")
 
-    def query(self, page=0, count=100, format='raw'):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         self.log.warn("implementation not done")

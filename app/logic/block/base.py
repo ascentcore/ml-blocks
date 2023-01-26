@@ -7,7 +7,7 @@ from app.generic_components.generic_types.error import ErrorNotImplemented
 from app.generic_components.log_mechanism.log_mechanism import LogBase
 from app.generic_components.plugin_loader.plugin_loader import PluginLoader
 from app.logic.block.loader.base import BlockLoader
-from app.logic.block.storage.base import BlockStorage
+from app.logic.block.storage.base import BlockStorage, BlockFormats
 
 # where to search for extensions
 BlockSources = [app.block.types.__file__, app.logic.block.types.__file__]
@@ -76,6 +76,9 @@ class BlockBase:
         raise ErrorNotImplemented()
 
     def count(self):
+        raise ErrorNotImplemented()
+
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         raise ErrorNotImplemented()
 
 

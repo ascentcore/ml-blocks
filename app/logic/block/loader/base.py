@@ -4,14 +4,7 @@ import app.block.loader
 from app.generic_components.generic_types.error import ErrorNotImplemented
 from app.generic_components.log_mechanism.log_mechanism import LOG
 from app.generic_components.plugin_loader.plugin_loader import PluginLoader
-
-
-class BlockFormats(str, Enum):
-    raw = "raw"
-    application_json = "application/json"
-    application_json_base64 = "application/json+base64"
-    application_file = "application/file"
-
+from app.logic.block.storage.base import BlockFormats
 
 # where to search for extensions
 BlockSources = [app.logic.block.loader.types.__file__, app.block.loader.__file__]
@@ -52,7 +45,7 @@ class BlockLoader:
     def refresh(self):
         raise ErrorNotImplemented()
 
-    def query(self, page=0, count=100, format='raw'):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         raise ErrorNotImplemented()
 
     def entries(self, format='application/file'):

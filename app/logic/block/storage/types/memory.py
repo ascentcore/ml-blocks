@@ -1,5 +1,5 @@
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.storage.base import BlockStorage
+from app.logic.block.storage.base import BlockStorage, BlockFormats
 
 
 class BlockStorageMemory(BlockStorage):
@@ -20,6 +20,6 @@ class BlockStorageMemory(BlockStorage):
     def count(self):
         return len(self.__dataset)
 
-    def query(self, page=0, count=100):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         offset = page * count
         return self.__dataset[offset:offset + count]

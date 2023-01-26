@@ -1,8 +1,18 @@
+from enum import Enum
+
 from app.generic_components.generic_types.error import ErrorNotImplemented
 from app.generic_components.log_mechanism.log_mechanism import LOG
 import app.block.storage
 import app.logic.block.storage.types
 from app.generic_components.plugin_loader.plugin_loader import PluginLoader
+
+
+class BlockFormats(str, Enum):
+    raw = "raw"
+    application_json = "application/json"
+    application_json_base64 = "application/json+base64"
+    application_file = "application/file"
+
 
 # where to search for extensions
 BlockSources = [app.logic.block.storage.types.__file__, app.block.storage.__file__]
@@ -48,7 +58,7 @@ class BlockStorage:
     def store(self, item):
         raise ErrorNotImplemented()
 
-    def query(self, page=0, count=100):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         raise ErrorNotImplemented()
 
 

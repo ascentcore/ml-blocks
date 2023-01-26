@@ -1,5 +1,6 @@
 from app.generic_components.log_mechanism.log_mechanism import LogBase
 from app.logic.block.base import BlockBase
+from app.logic.block.storage.base import BlockFormats
 
 
 class BlockSample(BlockBase):
@@ -24,4 +25,7 @@ class BlockSample(BlockBase):
         self.log.warn("implementation not done")
 
     def itemize(self, data):
+        self.log.warn("implementation not done")
+
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         self.log.warn("implementation not done")

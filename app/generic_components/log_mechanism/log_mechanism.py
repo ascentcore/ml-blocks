@@ -1,7 +1,9 @@
 import logging
+import os
 from enum import Enum
 
 from app.generic_components.file_wrapper.file_wrapper import WrapperFile
+from app.generic_components.folder_wrapper.folder_wrapper import FolderWrapper
 from app.generic_components.singleton_base.singleton_base import Singleton
 from app.generic_components.generic_types.error import ErrorNotPresent
 
@@ -35,11 +37,11 @@ class LogDefaults(object):
     Default log default
     """
     application_name = "App"
-    file_log = "console.log"
+    file_log = f'console_{str(os.getpid())}.log'
     level = logging.DEBUG
     format = '%(asctime)s|%(levelname)8s|%(name)25s|%(thread)5x|%(filename)20s|%(funcName)25s|%(lineno)3s|%(message)s'
     output = LogOutputType.all_activated
-    clear_on_start = True
+    clear_on_start = False
 
 
 class LogProperties(metaclass=Singleton):
@@ -72,12 +74,15 @@ class LogProperties(metaclass=Singleton):
         Add file stream configure
         """
         if LogOutput.is_active(self.configuration.output, LogOutputType.file):
+            folder_debug = "debug/"  # FIXME find a cleaner solution
+            file_log = folder_debug + self.configuration.file_log
+            FolderWrapper.create_folder(folder_debug, delete_if_present=self.configuration.clear_on_start)
             if self.configuration.clear_on_start:
                 try:
-                    WrapperFile.remove(path=self.configuration.file_log)
+                    WrapperFile.remove(path=file_log)
                 except ErrorNotPresent:
                     pass
-            handler_file = logging.FileHandler(self.configuration.file_log)
+            handler_file = logging.FileHandler(file_log)
             handler_file.setLevel(self.configuration.level)
             handler_file.setFormatter(formatter)
             self.__logger.addHandler(handler_file)

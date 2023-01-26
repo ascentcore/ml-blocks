@@ -1,5 +1,5 @@
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.storage.base import BlockStorage
+from app.logic.block.storage.base import BlockStorage, BlockFormats
 
 
 class BlockStorageSample(BlockStorage):
@@ -14,5 +14,5 @@ class BlockStorageSample(BlockStorage):
     def store(self, item):
         self.log.warn("implementation not done")
 
-    def query(self, page=0, count=100):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         self.log.warn("implementation not done")

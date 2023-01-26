@@ -4,7 +4,7 @@ from app.configuration.settings import Settings
 from app.generic_components.generic_types.error import ErrorInvalidUsage
 from app.generic_components.log_mechanism.log_mechanism import LogBase
 from app.generic_components.sqlite_wrapper.wrapper_sqlite import WrapperSqlite
-from app.logic.block.storage.base import BlockStorage
+from app.logic.block.storage.base import BlockStorage, BlockFormats
 
 
 class BlockSqliteCommands(str, Enum):
@@ -53,6 +53,6 @@ class BlockStorageSqlite(BlockStorage):
         self.log.debug(f"Number of entries {no}")
         return no
 
-    def query(self, page=0, count=100):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         offset = page * count
         return ""

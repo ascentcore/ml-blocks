@@ -28,6 +28,6 @@ def get_count(flow: RouterFlow = Depends(get_flow)) -> int:
 @router.get("/dataset")
 def get_dataset(page: int = 0,
                 count: int = 10,
-                format: BlockFormats = BlockFormats.raw,
+                output_format: BlockFormats = BlockFormats.raw,
                 flow: RouterFlow = Depends(get_flow)) :
-    return flow.block.block_active.query()  # FIXME
+    return flow.block.block_active.query(page=page, count=count, output_format=format)  # FIXME
