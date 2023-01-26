@@ -21,6 +21,7 @@ services:
   link1:
     volumes:
       - .:/app
+      - ./stores/link1:/app/data
     build:
       context: .
       dockerfile: Dockerfile
@@ -41,6 +42,7 @@ services:
       - link1
     volumes:
       - .:/app
+      - ./stores/link2:/app/data
     build:
       context: .
       dockerfile: Dockerfile

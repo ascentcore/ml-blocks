@@ -35,7 +35,7 @@ class LogDefaults(object):
     Default log default
     """
     application_name = "App"
-    file_log = "console.log"
+    file_log = "data/console.log"
     level = logging.DEBUG
     format = '%(asctime)s|%(levelname)5s|%(name)25s|%(thread)5x|%(filename)20s|%(funcName)15s|%(lineno)3s|%(message)s'
     output = LogOutputType.all_activated

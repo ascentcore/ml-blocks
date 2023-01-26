@@ -68,6 +68,10 @@ class Settings(metaclass=Singleton):
             self.log.debug('\t {} = {}'.format(variable.name, variable.value))
 
     @property
+    def registry(self):
+        return self.__variables[VariableMap.REGISTRY].value
+
+    @property
     def block_name(self):
         return self.__variables[VariableMap.BLOCK_NAME].value
 
@@ -94,3 +98,7 @@ class Settings(metaclass=Singleton):
     @property
     def sqlite_database(self):
         return self.__variables[VariableMap.SQLITE_STORAGE].value
+
+    @property
+    def data_dependency(self):
+        return self.__variables[VariableMap.DATA_DEPENDENCY].value
