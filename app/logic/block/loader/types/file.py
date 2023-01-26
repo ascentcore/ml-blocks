@@ -8,7 +8,7 @@ from app.configuration.settings import Settings
 from app.generic_components.file_wrapper.file_wrapper import WrapperFile
 from app.generic_components.folder_wrapper.folder_wrapper import FolderWrapper
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.loader.base import BlockLoader
+from app.logic.block.loader.base import BlockLoader, BlockFormats
 
 
 class LoaderFileInject:
@@ -64,7 +64,7 @@ class LoaderFileInjectFile(LoaderFileInject):
 class BlockLoaderFile(BlockLoader):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(name="BlockLoaderFile")
         self.log = LogBase.log(self.__class__.__name__)
         self.__settings = Settings()
         self.__folder_path = f'{self.__settings.mount_folder}/{self.__settings.storage_folder}'
@@ -92,7 +92,7 @@ class BlockLoaderFile(BlockLoader):
     def count(self):
         return len(self.dataset)
 
-    def query(self, page=0, count=100, format='raw'):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         offset = page * count
         file_list = self.dataset[offset:offset + count]
         return file_list

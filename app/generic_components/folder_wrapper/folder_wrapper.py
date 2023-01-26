@@ -2,7 +2,11 @@ import os
 import shutil
 
 from app.generic_components.generic_types.error import ErrorNotPresent
-from app.generic_components.log_mechanism.log_mechanism import LOG
+
+try:
+    from app.generic_components.log_mechanism.log_mechanism import LOG
+except ImportError:
+    pass
 
 
 class FolderWrapper:
@@ -11,19 +15,25 @@ class FolderWrapper:
     """
 
     @staticmethod
-    def create_folder(path:str, delete_if_present: bool = False):
+    def create_folder(path: str, delete_if_present: bool = False):
         """
         Create a folder if not present, or recreated it if flag is True
         """
-        LOG.debug(f'creating {path}')
+        try:
+            LOG.debug(f'creating {path}')
+        except NameError:
+            pass
         try:
             FolderWrapper.is_present(path=path)
             if delete_if_present:
                 shutil.rmtree(path, ignore_errors=True)
-                os.mkdir(path=path) # TODO do not like the duplication
+                os.mkdir(path=path)  # TODO do not like the duplication
         except ErrorNotPresent:
             os.mkdir(path=path)
-            LOG.debug(f'created {path} successfully')
+            try:
+                LOG.debug(f'created {path} successfully')
+            except NameError:
+                pass
 
     @staticmethod
     def is_present(path: str):

@@ -22,6 +22,8 @@ class VariableMap(IntEnum):
     BLOCK_NAME = 11
     HOST = 12
     SQLITE_STORAGE = 13
+    BLOCK_LOADER = 14
+    BLOCK_STORAGE = 15
 
 
 class Settings(metaclass=Singleton):
@@ -46,13 +48,18 @@ class Settings(metaclass=Singleton):
                                source=VariableSource.environment),
             VariableProperties(name=VariableMap.HOSTNAME.name, default_value="localhost",
                                source=VariableSource.environment),
-            VariableProperties(name=VariableMap.BLOCK_NAME.name, default_value="Pass Through ML Block",
+            VariableProperties(name=VariableMap.BLOCK_NAME.name, default_value="BlockSimple",
                                source=VariableSource.environment),
             VariableProperties(name=VariableMap.HOST.name,
                                default_value=str(socket.gethostbyname(socket.gethostname()))),
             VariableProperties(name=VariableMap.SQLITE_STORAGE.name,
-                               default_value="file::memory:?cache=shared")
-                               #default_value="database.db")
+                               default_value="file::memory:?cache=shared"),
+                               #default_value="database.db"),
+            VariableProperties(name=VariableMap.BLOCK_LOADER.name, default_value="BlockLoaderFile",
+                               # TODO all str to have single entry point
+                               source=VariableSource.environment),
+            VariableProperties(name=VariableMap.BLOCK_STORAGE.name, default_value="BlockStorageMemory", # TODO all str to have single entry point
+                               source=VariableSource.environment)
         ]
 
     def __init__(self):
@@ -61,11 +68,9 @@ class Settings(metaclass=Singleton):
         self.load_variables()
 
     def load_variables(self):
-        self.log.debug("Loaded values:")
         for properties in self.__variables_properties:
             variable = Variable(properties=properties)
             self.__variables.append(variable)
-            self.log.debug('\t {} = {}'.format(variable.name, variable.value))
 
     @property
     def registry(self):
@@ -74,6 +79,10 @@ class Settings(metaclass=Singleton):
     @property
     def block_name(self):
         return self.__variables[VariableMap.BLOCK_NAME].value
+    def print(self):
+        self.log.debug("Loaded values:")
+        for variable in self.__variables:
+            self.log.debug('\t {} = {}'.format(variable.name, variable.value))
 
     @property
     def mount_folder(self):
@@ -102,3 +111,16 @@ class Settings(metaclass=Singleton):
     @property
     def data_dependency(self):
         return self.__variables[VariableMap.DATA_DEPENDENCY].value
+    def active_block(self):
+        return self.__variables[VariableMap.BLOCK_NAME].value
+
+    @property
+    def active_block_loader(self):
+        return self.__variables[VariableMap.BLOCK_LOADER].value
+
+    @property
+    def active_block_storage(self):
+        return self.__variables[VariableMap.BLOCK_STORAGE].value
+
+    def get_variable(self, variable):
+        return self.__variables[variable].value

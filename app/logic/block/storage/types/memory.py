@@ -1,11 +1,11 @@
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.storage.base import BlockStorage
+from app.logic.block.storage.base import BlockStorage, BlockFormats
 
 
 class BlockStorageMemory(BlockStorage):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(name="BlockStorageMemory")
         self.log = LogBase.log(self.__class__.__name__)
         self.__dataset = []
         self.log.info(f'In memory storage initialized')
@@ -20,6 +20,6 @@ class BlockStorageMemory(BlockStorage):
     def count(self):
         return len(self.__dataset)
 
-    def query(self, page=0, count=100):
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
         offset = page * count
         return self.__dataset[offset:offset + count]

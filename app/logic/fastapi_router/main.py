@@ -34,7 +34,8 @@ class RouterMain(APIRouter):
         self.include_routes()
 
     def construct_routes(self):
-        self.__routes[RouterBlock()] = RoutesProperties(prefix="/block", tags=["block"])
+        # Deactivated for now TODO check if it will be needed in the future
+        # self.__routes[RouterBlock()] = RoutesProperties(prefix="/block", tags=["block"])
         self.__routes[RouterData()] = RoutesProperties(prefix="/data", tags=["data"])
         self.__routes[RouterPipeline()] = RoutesProperties(prefix="/pipeline", tags=["pipeline"])
 

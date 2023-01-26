@@ -1,44 +1,55 @@
+from app.configuration.settings import Settings
 from app.generic_components.log_mechanism.log_mechanism import LogBase
-from app.logic.block.base import BlockBase, BlockType
-from app.logic.block.plugin.csv_plugin import BlockCSV
+from app.generic_components.singleton_base.singleton_base import Singleton
+from app.logic.block.base import BlockBase
+from app.logic.block.loader.base import BlockLoader
+from app.logic.block.storage.base import BlockStorage
 
 
-class BlockMain:
-
-    __block_type: BlockType = BlockType.base
+class BlockMain(metaclass=Singleton):
     __block_active: BlockBase = None
+    __block_loader: BlockLoader = None
+    __block_storage: BlockStorage = None
 
     def __init__(self):
         self.log = LogBase.log(class_name=self.__class__.__name__)
-        self.reload_configuration(value=BlockType.csv_loader)  # FIXME
+        self.__settings = Settings()
+        self.load_block_storage()
+        self.load_block_loader()
+        self.load_block_type()
 
-    def reload_configuration(self, value=BlockType.base):
-        old_value = self.__block_type
-        self.__block_type = value
-        # TODO add also load from env variables
-        if value == BlockType.base:
-            # TODO clean old block model or whatever needed
-            self.__block_active = BlockBase()
-        elif value == BlockType.csv_loader:
-            self.__block_active = BlockCSV()
-        else:
-            self.__block_type = old_value
-            self.log.warn("Unsupported type {}".format(value))
+    # TODO make more generic functions here
+    def load_block_storage(self):
+        self.log.debug(f'BlockStorage.plugins {len(BlockStorage.plugins)}')
+        for loader in BlockStorage.plugins:
+            inst = loader()
+            if self.__settings.active_block_storage == inst.name:
+                self.log.debug(f'>Activated storage {inst.name} {type(inst)}')
+                self.__block_storage = inst
+                break
 
-        if self.__block_type != old_value:
-            self.load_data(from_scratch=True)
+    def load_block_loader(self):
+        self.log.debug(f'BlockLoader.plugins {len(BlockLoader.plugins)}')
+        for loader in BlockLoader.plugins:
+            inst = loader()
+            if self.__settings.active_block_loader == inst.name:
+                self.log.debug(f'>Activated loader {inst.name} {type(inst)}')
+                self.__block_loader = inst
+                break
 
-        return self.__block_type
-
-    def type(self):
-        return self.__block_type
+    def load_block_type(self):
+        self.log.debug(f'BlockBase plugins {len(BlockBase.plugins)} wanted {self.__settings.active_block}')
+        for block in BlockBase.plugins:
+            inst = block(loader=self.__block_loader, storage=self.__block_storage)
+            if self.__settings.active_block == inst.name:
+                self.log.debug(f'>Activated block {inst.name} {type(inst)}')
+                self.__block_active = inst
+                self.load_data(from_scratch=True)  # TODO split into multiple functions for reusable purpose
+                break
 
     @property
     def block_active(self):
         return self.__block_active
 
-    def select_block(self, value):
-        return self.reload_configuration(value=value)
-
-    def load_data(self, from_scratch = False):
+    def load_data(self, from_scratch=False):
         self.block_active.load_data(from_scratch=from_scratch)

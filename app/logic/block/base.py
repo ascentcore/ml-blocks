@@ -1,45 +1,42 @@
 from enum import Enum
-from typing import List
 
+import app.block.types
+import app.logic.block.types
 from app.configuration.settings import Settings
 from app.generic_components.generic_types.error import ErrorNotImplemented
 from app.generic_components.log_mechanism.log_mechanism import LogBase
+from app.generic_components.plugin_loader.plugin_loader import PluginLoader
 from app.logic.block.loader.base import BlockLoader
-from app.logic.block.loader.file import BlockLoaderFile
-from app.logic.block.storage.base import BlockStorage
-from app.logic.block.storage.memory import BlockStorageMemory
+from app.logic.block.storage.base import BlockStorage, BlockFormats
 
-
-class BlockType(str, Enum):
-    base = "base"
-    csv_loader = "csv_loader"
+# where to search for extensions
+BlockSources = [app.block.types.__file__, app.logic.block.types.__file__]
 
 
 class BlockBase:
+    """Basic resource class. Concrete resources will inherit from this one
+    """
+    plugins = []
 
-    def __init__(self, name="",
-                 block_type=BlockType.base,
-                 loader=BlockLoaderFile(),
-                 storage: BlockStorage = BlockStorageMemory()):
+    # For every class that inherits from the current,
+    # the class name will be added to plugins
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if type(cls) not in cls.plugins:
+            cls.plugins.append(cls)
+
+    def __init__(self,
+                 name="BlockSimple",
+                 loader=BlockLoader(),
+                 storage=BlockStorage()):
         super().__init__()
 
         self.log = LogBase.log(self.__class__.__name__)
         self.__settings = Settings()
         self.__name = name
-        if len(name) == 0:
-            self.__name = self.__settings.block_name
-        self.__type = block_type
-        self.log.debug("Initialized block {}".format(self.__name))
         self.__loader = loader
         self.__storage = storage
-
-    @property
-    def type(self):
-        return self.__type
-
-    @type.setter
-    def type(self, value):
-        self.__type = value
+        self.log.debug("Initialized block {}".format(self.__name))
 
     @property
     def name(self):
@@ -80,3 +77,9 @@ class BlockBase:
 
     def count(self):
         raise ErrorNotImplemented()
+
+    def query(self, page=0, count=100, output_format: BlockFormats = BlockFormats.raw):
+        raise ErrorNotImplemented()
+
+
+PluginLoader.load_plugins(sources=BlockSources)
