@@ -30,4 +30,4 @@ def get_dataset(page: int = 0,
                 count: int = 10,
                 output_format: BlockFormats = BlockFormats.raw,
                 flow: RouterFlow = Depends(get_flow)) :
-    return flow.block.block_active.query(page=page, count=count, output_format=format)  # FIXME
+    return flow.block.block_active.query(page=page, count=count, output_format=output_format)  # FIXME
