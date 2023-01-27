@@ -111,12 +111,17 @@ class Settings(metaclass=Singleton):
     @property
     def data_dependency(self):
         return self.__variables[VariableMap.DATA_DEPENDENCY].value
+
     def active_block(self):
         return self.__variables[VariableMap.BLOCK_NAME].value
 
     @property
     def active_block_loader(self):
         return self.__variables[VariableMap.BLOCK_LOADER].value
+
+    @property
+    def hostname(self):
+        return self.__variables[VariableMap.HOSTNAME].value
 
     @property
     def active_block_storage(self):

@@ -6,16 +6,16 @@ from app.configuration.settings import Settings
 from app.generic_components.log_mechanism.log_mechanism import LogBase
 from app.generic_components.sqlite_wrapper.wrapper_sqlite import WrapperSqlite
 from app.generic_components.singleton_base.singleton_base import Singleton
-from app.utils.connection import do_connect
+from app.utils.connection import do_connect, connect
 
 
 class RegistrySqliteCommands(str, Enum):
     create_table = "CREATE TABLE if not  exists \"registry\" \
                    ( \"id\"	INTEGER, " \
-                    "\"block_identifier\"	TEXT, " \
-                    "\"from_host\"	TEXT, " \
-                    "\"to_host\"	TEXT, " \
-                    "\"type\"	TEXT, " \
+                   "\"block_identifier\"	TEXT, " \
+                   "\"from_host\"	TEXT, " \
+                   "\"to_host\"	TEXT, " \
+                   "\"type\"	TEXT, " \
                    "PRIMARY KEY(\"id\" AUTOINCREMENT) );"
 
     clear = "DELETE FROM registry;"
@@ -24,14 +24,18 @@ class RegistrySqliteCommands(str, Enum):
 
 
 class Registry(metaclass=Singleton):
+    # TODO maybe in the future to make configurable
+    __register_addrs = 'http://{}/api/v1/pipeline/register?block_id={}&upstream={}&type=data_dependency'
+    __max_retries = 5
+    __max_timeout = 5  # seconds
 
     def __init__(self):
         self.log = LogBase.log(class_name=self.__class__.__name__)
         self.__settings = Settings()
-        
+        self.__sqlite_db = None
 
     def initialize(self):
-        if self.__settings.registry != None:
+        if self.__settings.registry is not None:
             self.log.info(f'Trying to register to {self.__settings.registry}')
             loop = asyncio.get_event_loop()
             register_fn = self.do_register()
@@ -51,8 +55,30 @@ class Registry(metaclass=Singleton):
 
     async def do_register(self):
         if self.__settings.data_dependency:
-            IPAddr = socket.gethostbyname(self.__settings.data_dependency)
-            await do_connect(f'http://{self.__settings.registry}/api/v1/pipeline/register?block_id={self.__settings.data_dependency}&upstream={IPAddr}&type=data_dependency')
+            trials = 0
+            while trials < self.__max_retries:
+                domain = socket.getfqdn(self.__settings.data_dependency)
+                registry_addr = ""
+                #TODO maybe improve here and configuration for network names
+                if domain != self.__settings.data_dependency and "ml-blocks-net" in domain:
+                    ip_addr = socket.gethostbyname(self.__settings.data_dependency)
+                    registry_addr    = self.__register_addrs.format(self.__settings.registry, self.__settings.data_dependency, ip_addr)
+                    self.log.debug(f'Trying to connect {registry_addr}')
+                    result = await connect(registry_addr)
+                    if not result:
+                        self.log.debug(f'Unable to connect {registry_addr} trial {trials}')
+                    else:
+                        self.log.debug(f'Connected {registry_addr}')
+                        break
+                else:
+                    self.log.warn(f'Registry for dependency {self.__settings.data_dependency} not found')
+
+                trials = trials + 1                
+                await asyncio.sleep(self.__max_timeout)
+            if trials == self.__max_retries:
+                self.log.warn(f'Unable to connect {registry_addr} register aborted')
+        else:
+            self.log.info('No dependency given')
 
     def clear(self):
         self.__sqlite_db.send_command(command=RegistrySqliteCommands.clear)

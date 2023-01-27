@@ -15,3 +15,4 @@ ENV PYTHONPATH=/app
 RUN apt-get update
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-delay 1" ]
+#CMD ["uvicorn", "--reload", "--reload-delay", "1", "--reload-dir", "app/", "--reload-dir", "stores/", "--reload-dir", "tests/", "app.main:app", "--host", "0.0.0.0", "--port", "80" ]

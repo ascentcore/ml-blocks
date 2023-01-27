@@ -48,8 +48,8 @@ class BlockMain(metaclass=Singleton):
                 break
 
     @property
-    def block_active(self):
+    def active(self):
         return self.__block_active
 
     def load_data(self, from_scratch=False):
-        self.block_active.load_data(from_scratch=from_scratch)
+        self.active.load_data(from_scratch=from_scratch)

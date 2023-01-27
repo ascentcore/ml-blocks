@@ -2,9 +2,11 @@ version: "3.3"
 services:
 
   root_block:
+    hostname: root_block
     volumes:
       - .:/app 
       - ./stores/ds_root:/app/data
+      - ./debug:/app/debug
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,9 +21,11 @@ services:
       - ml-blocks-net
 
   link1:
+    hostname: link1
     volumes:
       - .:/app
       - ./stores/link1:/app/data
+      - ./debug:/app/debug
     build:
       context: .
       dockerfile: Dockerfile
@@ -38,11 +42,13 @@ services:
       - ml-blocks-net
 
   link2:
+    hostname: link2
     depends_on:
       - link1
     volumes:
       - .:/app
       - ./stores/link2:/app/data
+      - ./debug:/app/debug
     build:
       context: .
       dockerfile: Dockerfile
