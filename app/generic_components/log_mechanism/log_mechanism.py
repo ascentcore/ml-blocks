@@ -1,5 +1,5 @@
 import logging
-import os
+import socket
 from enum import Enum
 
 from app.generic_components.file_wrapper.file_wrapper import WrapperFile
@@ -37,7 +37,7 @@ class LogDefaults(object):
     Default log default
     """
     application_name = "App"
-    file_log = f'console_{str(os.getpid())}.log'
+    file_log = f'console_{str(socket.gethostname())}.log'
     level = logging.DEBUG
     format = '%(asctime)s|%(levelname)8s|%(name)25s|%(thread)5x|%(filename)20s|%(funcName)25s|%(lineno)3s|%(message)s'
     output = LogOutputType.all_activated
