@@ -3,39 +3,24 @@ title: Introduction
 type: docs
 ---
 
-# Acerbo datus maxime
+# MLBlocks
 
-{{< columns >}}
-## Astris ipse furtiva
-
-Est in vagis et Pittheus tu arge accipiter regia iram vocatur nurus. Omnes ut
-olivae sensit **arma sorori** deducit, inesset **crudus**, ego vetuere aliis,
-modo arsit? Utinam rapta fiducia valuere litora _adicit cursu_, ad facies
-
-<--->
-
-## Suis quot vota
-
-Ea _furtique_ risere fratres edidit terrae magis. Colla tam mihi tenebat:
-miseram excita suadent es pecudes iam. Concilio _quam_ velatus posset ait quod
-nunc! Fragosis suae dextra geruntur functus vulgata.
-{{< /columns >}}
+Rapidly turn your machine learning concepts into reality. ML Blocks offers an agile platform for creating proofs of concept and demonstrations, accelerating your project’s journey from idea to implementation.
 
 
-## Tempora nisi nunc
+{{<columns>}} 
+<!-- begin columns block -->
 
-Lorem **markdownum** emicat gestu. Cannis sol pressit ducta. **Est** Idaei,
-tremens ausim se tutaeque, illi ulnis hausit, sed, lumina cutem. Quae avis
-sequens!
+### Dataset Handling
+Upload and filter and process datasets effortlessly.
 
-    var panel = ram_design;
-    if (backup + system) {
-        file.readPoint = network_native;
-        sidebar_engine_device(cell_tftp_raster,
-                dual_login_paper.adf_vci.application_reader_design(
-                graphicsNvramCdma, lpi_footer_snmp, integer_model));
-    }
+<---> <!-- magic separator, between columns -->
 
-## Locis suis novi cum suoque decidit eadem
+### Model Management
+Easily train, upload and manage your machine learning models.
 
-Idmoniae ripis, at aves, ali missa adest, ut _et autem_, et ab?
+<---> <!-- magic separator, between columns -->
+### Predict
+Leverage our robust prediction APIs to make real-time decisions based on your model.
+
+{{</columns>}}
